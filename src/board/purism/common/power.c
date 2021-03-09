@@ -512,6 +512,13 @@ void power_event(void) {
         // Assert SYS_PWROK (GPIO E5); PCH will de-assert PLT_RST#
         GPIO_SET_DEBUG(PM_PWROK, true);
 
+        // Power on touchpad, camera, wifi/BT, ethernet, killswitch LEDs
+        GPIO_SET_DEBUG(POWER_TP_ON, true);
+        GPIO_SET_DEBUG(CCD_EN, true);
+        GPIO_SET_DEBUG(POWER_ETH_ON, true);
+        GPIO_SET_DEBUG(WLAN_PWR_EN, true);
+        GPIO_SET_DEBUG(LED_AIRPLANE_N, true);
+
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
@@ -527,6 +534,13 @@ void power_event(void) {
 
         // Clear GPIO F2
         GPIO_SET_DEBUG(ROP_VCCST_PWRGD, false);
+
+        // Power down touchpad, camera, wifi/BT, ethernet, killswitch LEDs
+        GPIO_SET_DEBUG(POWER_TP_ON, false);
+        GPIO_SET_DEBUG(CCD_EN, false);
+        GPIO_SET_DEBUG(POWER_ETH_ON, false);
+        GPIO_SET_DEBUG(WLAN_PWR_EN, false);
+        GPIO_SET_DEBUG(LED_AIRPLANE_N, false);
     }
     pg_last = pg_new;
 
