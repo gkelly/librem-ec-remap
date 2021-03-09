@@ -481,47 +481,51 @@ void power_event(void) {
     // Update power state before determining actions
     update_power_state();
 
-    // If system power is good
     static bool pg_last = false;
-    //bool pg_new = gpio_get(&ALL_SYS_PWRGD);
-    bool pg_new = gpio_get(&DDR3VR_PWRGD) && gpio_get(&V105A_PWRGD) && gpio_get(&PM_SLP_S3_N);
+    // No ALL_SYS_PWRGD available, so derive best we can
+	// Use same GPIOs to detect as ITE fw
+    bool pg_new = gpio_get(&DDR3VR_PWRGD) && gpio_get(&V105A_PWRGD)
+            && gpio_get(&PM_SLP_S3_N);
+
+    // If system power is good, has changed
     if (pg_new && !pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
 
+        // 1ms delay before bringing up VCCST_PWRGD, per ITE fw
         delay_ms(1);
 
-        // ROP_VCCST_PWRGD_ON(); set GPIO F2
+        // ROP_VCCST_PWRGD_ON (GPIO F2)
         GPIO_SET_DEBUG(ROP_VCCST_PWRGD, true);
 
+        // 3ms delay before bringing up ALL_SYS_PWRGD_VRON, per ITE fw
         delay_ms(3);
 
-        // Set VR enable line
-        // ALL_SYS_PWRGD_ON(); set GPIO B5
+        // Set VR enable line (GPIO B5)
         GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, true);
+
+        // 100ms delay between ALL_SYS_PWRGD and PCH_PWROK, per PCIe spec
         delay_ms(100);
 
-        //set GPIO G1
+        //Assert PCH_PWROK (GPIO G1)
         GPIO_SET_DEBUG(PCH_PWROK_EC, true);
-        delay_ms(100);
 
-        // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
-        // set GPIO E5
+        // Assert SYS_PWROK (GPIO E5); PCH will de-assert PLT_RST#
         GPIO_SET_DEBUG(PM_PWROK, true);
+
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
         // Clear GPIOs in reverse order as set above
 
-        // De-assert PCH_PWROK_EC (GPIO G1) -- not cleared by ITE
-        //GPIO_SET_DEBUG(PCH_PWROK_EC, false);
+        // PCH_PWROK (GPIO G1) is not cleared by ITE fw; must stay high
 
-        // De-assert PCH_PWROK (GPIO E5)
+        // De-assert SYS_PWROK (GPIO E5)
         GPIO_SET_DEBUG(PM_PWROK, false);
 
-        //clear GPIO B5
+        // Clear GPIO B5
         GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, false);
 
-        // clear GPIO F2
+        // Clear GPIO F2
         GPIO_SET_DEBUG(ROP_VCCST_PWRGD, false);
     }
     pg_last = pg_new;
