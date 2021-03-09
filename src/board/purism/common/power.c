@@ -484,32 +484,45 @@ void power_event(void) {
     // If system power is good
     static bool pg_last = false;
     //bool pg_new = gpio_get(&ALL_SYS_PWRGD);
-    bool pg_new = gpio_get(&V095A_PWRGD) && gpio_get(&V105A_PWRGD);
+    bool pg_new = gpio_get(&DDR3VR_PWRGD) && gpio_get(&V105A_PWRGD) && gpio_get(&PM_SLP_S3_N);
     if (pg_new && !pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
 
-        //TODO: tPLT04;
+        delay_ms(1);
 
-        // Allow H_VR_READY to set PCH_PWROK
-        GPIO_SET_DEBUG(PM_PWROK, true);
+        // ROP_VCCST_PWRGD_ON(); set GPIO F2
+        GPIO_SET_DEBUG(ROP_VCCST_PWRGD, true);
 
-        // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
-        delay_ms(10);
+        delay_ms(3);
 
-#if HAVE_PCH_PWROK_EC
-        // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
+        // Set VR enable line
+        // ALL_SYS_PWRGD_ON(); set GPIO B5
+        GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, true);
+        delay_ms(100);
+
+        //set GPIO G1
         GPIO_SET_DEBUG(PCH_PWROK_EC, true);
-#endif // HAVE_PCH_PWROK_EC
+        delay_ms(100);
+
+        // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
+        // set GPIO E5
+        GPIO_SET_DEBUG(PM_PWROK, true);
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
-#if HAVE_PCH_PWROK_EC
-        // De-assert SYS_PWROK
-        GPIO_SET_DEBUG(PCH_PWROK_EC, false);
-#endif // HAVE_PCH_PWROK_EC
+        // Clear GPIOs in reverse order as set above
 
-        // De-assert PCH_PWROK
+        // De-assert PCH_PWROK_EC (GPIO G1) -- not cleared by ITE
+        //GPIO_SET_DEBUG(PCH_PWROK_EC, false);
+
+        // De-assert PCH_PWROK (GPIO E5)
         GPIO_SET_DEBUG(PM_PWROK, false);
+
+        //clear GPIO B5
+        GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, false);
+
+        // clear GPIO F2
+        GPIO_SET_DEBUG(ROP_VCCST_PWRGD, false);
     }
     pg_last = pg_new;
 
