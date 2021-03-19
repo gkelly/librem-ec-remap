@@ -27,4 +27,5 @@ void board_init(void) {
 
 void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
 
-void board_event(void) {}
+// called once per second
+void board_1s_event(void) {}

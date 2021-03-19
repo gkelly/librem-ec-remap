@@ -119,6 +119,8 @@ void main(void) {
 
                 // Updates battery status
                 battery_event();
+
+                board_1s_event();
             }
         }
 
