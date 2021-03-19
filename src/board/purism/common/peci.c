@@ -158,10 +158,12 @@ void peci_event(void) {
 
             peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
             duty = fan_duty(&FAN, peci_temp);
+            DEBUG("1PECI temp=%d / %d\n", peci_temp, duty);
         } else {
             // Default to 50% if there is an error
             peci_temp = 0;
             duty = PWM_DUTY(50);
+            DEBUG("E: PECI temp\n");
         }
     } else {
         // Turn fan off if not in S0 state
