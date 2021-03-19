@@ -359,7 +359,9 @@ static void kbc_on_input_data(struct Kbc * kbc, uint8_t data) {
         case KBC_STATE_SECOND_PORT_INPUT:
             TRACE("  write second port input\n");
             state = KBC_STATE_NORMAL;
+#ifdef PS2_TOUCHPAD
             ps2_write(&PS2_TOUCHPAD, &data, 1);
+#endif
             break;
     }
 }
@@ -374,7 +376,9 @@ static void kbc_on_output_empty(struct Kbc * kbc) {
             }
             break;
         case KBC_STATE_TOUCHPAD:
+#ifdef PS2_TOUCHPAD
             state_data = *(PS2_TOUCHPAD.data);
+#endif
             // Fall through
         case KBC_STATE_MOUSE:
             TRACE("kbc mouse: %02X\n", state_data);
@@ -407,6 +411,7 @@ void kbc_event(struct Kbc * kbc) {
     uint8_t sts;
 
     // Read from touchpad when possible
+#ifdef PS2_TOUCHPAD
     if (kbc_second) {
         *(PS2_TOUCHPAD.control) = 0x07;
         if (state == KBC_STATE_NORMAL) {
@@ -419,6 +424,7 @@ void kbc_event(struct Kbc * kbc) {
     } else {
         ps2_reset(&PS2_TOUCHPAD);
     }
+#endif
 
     // Read command/data while available
     sts = kbc_status(kbc);
