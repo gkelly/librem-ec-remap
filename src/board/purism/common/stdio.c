@@ -26,7 +26,7 @@ int putchar(int c) {
 #endif
 
 #ifdef I2C_DEBUGGER
-    i2c_send(&I2C_SMBUS, I2C_DEBUGGER, &byte, 1);
+    i2c_send(&I2C_DEBUG_BUS, I2C_DEBUGGER, &byte, 1);
 #endif
 
 #ifdef PARALLEL_DEBUG
