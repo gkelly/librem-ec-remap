@@ -3,239 +3,174 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 
-struct Gpio __code ACIN_N =         GPIO(B, 6);
-struct Gpio __code AC_PRESENT =     GPIO(E, 7);
-struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
-struct Gpio __code BKL_EN =         GPIO(H, 2);
-struct Gpio __code BT_EN =          GPIO(F, 3);
-struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2);
-struct Gpio __code CCD_EN =         GPIO(G, 0);
-struct Gpio __code DD_ON =          GPIO(E, 4);
-struct Gpio __code EC_EN =          GPIO(E, 1);
-struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
-struct Gpio __code LAN_WAKEUP_N =   GPIO(B, 2);
-struct Gpio __code LED_ACIN =       GPIO(C, 7);
-struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
-struct Gpio __code LED_BAT_CHG =    GPIO(A, 5);
-struct Gpio __code LED_BAT_FULL =   GPIO(A, 6);
-struct Gpio __code LED_PWR =        GPIO(A, 7);
-struct Gpio __code LID_SW_N =       GPIO(D, 1);
-struct Gpio __code PCH_DPWROK_EC =  GPIO(A, 3);
-struct Gpio __code PCH_PWROK_EC =   GPIO(A, 4);
-struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0);
-struct Gpio __code PM_PWROK =       GPIO(C, 6);
-struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
-struct Gpio __code PWR_SW_N =       GPIO(D, 0);
-struct Gpio __code SB_KBCRST_N =    GPIO(E, 6);
-struct Gpio __code SCI_N =          GPIO(D, 4);
-struct Gpio __code SLP_SUS_N =      GPIO(I, 2);
-struct Gpio __code SMI_N =          GPIO(D, 3);
-struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
-struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
-struct Gpio __code SUSWARN_N =      GPIO(D, 7);
-struct Gpio __code SUS_PWR_ACK =    GPIO(J, 0);
-struct Gpio __code SWI_N =          GPIO(E, 0);
-struct Gpio __code USB_PWR_EN_N =   GPIO(F, 7);
-struct Gpio __code VA_EC_EN =       GPIO(E, 3);
-struct Gpio __code VR_ON =          GPIO(H, 4);
-struct Gpio __code WLAN_EN =        GPIO(H, 5);
-struct Gpio __code WLAN_PWR_EN =    GPIO(J, 4);
+struct Gpio __code ACIN_N =				GPIO(I, 5);	// ADP_IN#
+struct Gpio __code AC_PRESENT =			GPIO(C, 4);	// AC_PRESENT
+struct Gpio __code BKL_EN =				GPIO(E, 0);	// LCD backlight LED_ON
+struct Gpio __code BT_EN =				GPIO(C, 7);	// BT_ON
+struct Gpio __code BUF_PLT_RST_N =		GPIO(D, 2);
+struct Gpio __code CCD_EN =				GPIO(J, 2);	// camera on/off
+struct Gpio __code DD_ON =				GPIO(H, 3);	// debug VDD on/off, NA use dummy BLCTL
+struct Gpio __code EC_RSMRST_N =		GPIO(B, 7);
+struct Gpio __code LED_AIRPLANE_N =		GPIO(F, 3);	// WiFi HKS LED
+struct Gpio __code LED_BAT_CHG =		GPIO(J, 5);	// green LED
+struct Gpio __code LED_BAT_WARN =		GPIO(J, 4);	// orange LED
+struct Gpio __code LED_PWR =			GPIO(C, 5);
+struct Gpio __code LID_SW =				GPIO(H, 6);
+struct Gpio __code PCH_DPWROK_EC =		GPIO(F, 5);	// DSW_PWROK -> DPW_PWROK -> A_POWER_OK
+struct Gpio __code PCH_PWROK_EC =		GPIO(G, 1);
+struct Gpio __code PM_PWROK =			GPIO(E, 5);	// SYS PWR OK ???
+struct Gpio __code PWR_BTN_N =			GPIO(H, 4);	// out, power button to sys
+struct Gpio __code PWR_SW_N =			GPIO(E, 4);	// in, power switch state ?
+struct Gpio __code SB_KBCRST_N =		GPIO(B, 6);
+struct Gpio __code SCI_N =				GPIO(D, 3);	// SMC_RUNTIME_SCI#
+struct Gpio __code SWI_N =				GPIO(D, 4);	// SMC_EXTSMI#
+struct Gpio __code USB_PWR_EN_N =		GPIO(I, 7);	// type-C +5V enable
+struct Gpio __code WLAN_EN =			GPIO(D, 5);
+struct Gpio __code WLAN_PWR_EN =		GPIO(D, 0);
+struct Gpio __code V095A_EN =			GPIO(F, 1);
+struct Gpio __code V095A_PWRGD =		GPIO(E, 2);
+struct Gpio __code V105A_EN =			GPIO(G, 6);
+struct Gpio __code V105A_PWRGD =		GPIO(A, 7);
+struct Gpio __code ALL_SYS_PWRGD_VRON =	GPIO(B, 5);	// ALL_SYS_PWRGD_VRON
+struct Gpio __code ROP_VCCST_PWRGD =	GPIO(F, 2);	// ROP_VCCST_PWRGD
+struct Gpio __code SMC_SHUTDOWN_N =		GPIO(E,1);	// power supply latch
+struct Gpio __code DDR3VR_PWRGD =		GPIO(D, 1);
+struct Gpio __code PM_SLP_S0_N =		GPIO(B, 0);
+struct Gpio __code PM_SLP_S3_N =		GPIO(I, 4);
+struct Gpio __code PM_SLP_S4_N =		GPIO(I, 3);
+struct Gpio __code BAT_DETECT_N =		GPIO(I, 2);
+struct Gpio __code POWER_TP_ON =		GPIO(C, 0);	// power supply for touchpad
+struct Gpio __code POWER_ETH_ON =		GPIO(C, 6);	// power supply for Gbit ethernet controller
+struct Gpio __code KBD_BACKLIGHT_EN =	GPIO(A, 6);
+struct Gpio __code CHG_CELL_CFG =		GPIO(J, 1);
 
 void gpio_init() {
-    // Enable LPC reset on GPD2
-    GCR = 0x04;
+    GCR = 0x04;			// Enable LPC reset on GPD2
 
-    // Set GPIO data
-    GPDRA = 0;
-    // NC
-    GPDRB = (1 << 0);
-    GPDRC = 0;
-    // PWR_BTN#, SCI#, SMI#
-    GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
-    GPDRE = 0;
-    // USB_PWR_EN#, H_PECI
-    GPDRF = 0xC0; // (1 << 7) | (1 << 6)
-    // AIRPLANE_LED#
-    GPDRG = (1 << 6);
-    GPDRH = 0;
-    GPDRI = 0;
-    GPDRJ = 0;
+    // GPIO port A
+    GPDRA = 0x00;		// init data with all 0 = off
 
-    // Set GPIO control
-    // EC_SSD_LED#
-    GPCRA0 = GPIO_IN;
-    // KBC_BEEP
-    GPCRA1 = GPIO_ALT;
-    // CPU_FAN
-    GPCRA2 = GPIO_ALT;
-    // PCH_DPWROK_EC
-    GPCRA3 = GPIO_IN;
-    // PCH_PWROK_EC
-    GPCRA4 = GPIO_OUT;
-    // LED_BAT_CHG
-    GPCRA5 = GPIO_OUT;
-    // LED_BAT_FULL
-    GPCRA6 = GPIO_OUT;
-    // LED_PWR
-    GPCRA7 = GPIO_OUT;
-    // NC
-    GPCRB0 = GPIO_OUT;
-    // H_PROCHOT_EC
-    GPCRB1 = GPIO_OUT;
-    // LAN_WAKEUP#
-    GPCRB2 = GPIO_IN | GPIO_UP;
-    // SMC_BAT
-    GPCRB3 = GPIO_ALT;
-    // SMD_BAT
-    GPCRB4 = GPIO_ALT;
-    // GA20
-    GPCRB5 = GPIO_OUT;
-    // AC_IN#
-    GPCRB6 = GPIO_IN | GPIO_UP;
-    // FP_RST#
-    GPCRB7 = GPIO_IN;
-    // ALL_SYS_PWRGD
-    GPCRC0 = GPIO_IN;
-    // SMC_VGA_THERM
-    GPCRC1 = GPIO_ALT;
-    // SMD_VGA_THERM
-    GPCRC2 = GPIO_ALT;
-    // KSO16 (Darter)
-    GPCRC3 = GPIO_IN;
-    // CNVI_DET#
-    GPCRC4 = GPIO_OUT;
-    // KSO17 (Darter)
-    GPCRC5 = GPIO_IN;
-    // PM_PWROK
-    GPCRC6 = GPIO_OUT;
-    // LED_ACIN
-    GPCRC7 = GPIO_OUT;
-    // PWR_SW#
-    GPCRD0 = GPIO_IN | GPIO_UP;
-    // LID_SW#
-    GPCRD1 = GPIO_IN | GPIO_UP;
-    // BUF_PLT_RST#
-    GPCRD2 = GPIO_ALT;
-    // SMI#
-    GPCRD3 = GPIO_IN;
-    // SCI#
-    GPCRD4 = GPIO_IN;
-    // PWR_BTN#
-    GPCRD5 = GPIO_OUT;
-    // CPU_FANSEN
-    GPCRD6 = GPIO_ALT;
-    // SUSWARN#
-    GPCRD7 = GPIO_IN;
-    // SWI#
-    GPCRE0 = GPIO_OUT;
-    // EC_EN
-    GPCRE1 = GPIO_OUT;
-    // PCH_SLP_WLAN#_R
-    GPCRE2 = GPIO_IN;
-    // VA_EC_EN
-    GPCRE3 = GPIO_OUT;
-    // DD_ON
-    GPCRE4 = GPIO_OUT;
-    // EC_RSMRST#
-    GPCRE5 = GPIO_OUT;
-    // SB_KBCRST#
-    GPCRE6 = GPIO_OUT;
-    // AC_PRESENT / PM_PWROK
-    GPCRE7 = GPIO_OUT;
-    // 80CLK
-    GPCRF0 = GPIO_IN;
-    // USB_CHARGE_EN
-    GPCRF1 = GPIO_OUT;
-    // 3IN1
-    GPCRF2 = GPIO_IN | GPIO_UP;
-    // BT_EN
-    GPCRF3 = GPIO_OUT;
-    // TP_CLK
-    GPCRF4 = GPIO_ALT;
-    // TP_DATA
-    GPCRF5 = GPIO_ALT;
-    // H_PECI
-    GPCRF6 = GPIO_ALT;
-    // USB_PWR_EN#
-    GPCRF7 = GPIO_OUT;
-    // CCD_EN
-    GPCRG0 = GPIO_OUT;
-    // 3G_EN
-    GPCRG1 = GPIO_OUT;
-    // VDD3
-    GPCRG2 = GPIO_OUT;
-    // HSPI_CE#
-    GPCRG3 = GPIO_ALT;
-    // HSPI_MSI
-    GPCRG4 = GPIO_ALT;
-    // HSPI_MSO
-    GPCRG5 = GPIO_ALT;
-    // AIRPLAN_LED#
-    GPCRG6 = GPIO_OUT;
-    // HCPI_SCLK
-    GPCRG7 = GPIO_ALT;
-    // EC_CLKRUN#
-    GPCRH0 = GPIO_ALT;
-    // SUSC#_PCH
-    GPCRH1 = GPIO_IN;
-    // BKL_EN
-    GPCRH2 = GPIO_OUT;
-    // NC
-    GPCRH3 = GPIO_OUT;
-    // VR_ON
-    GPCRH4 = GPIO_IN;
-    // WLAN_EN
-    GPCRH5 = GPIO_OUT;
-    // SUSB#_PCH
-    GPCRH6 = GPIO_IN;
-    // Unknown
-    GPCRH7 = GPIO_IN;
-    // BAT_DET
-    GPCRI0 = GPIO_ALT;
-    // BAT_VOLT
-    GPCRI1 = GPIO_ALT;
-    // SLP_SUS#
-    GPCRI2 = GPIO_IN;
-    // THERM_VOLT
-    GPCRI3 = GPIO_ALT;
-    // TOTAL_CUR
-    GPCRI4 = GPIO_ALT;
-    // AZ_RST#_EC
-    GPCRI5 = GPIO_IN;
-    // LIGHT_KB_DET#
-    GPCRI6 = GPIO_IN;
-    // MODEL_ID
-    GPCRI7 = GPIO_IN;
-    // SUS_PWR_ACK
-    GPCRJ0 = GPIO_IN | GPIO_DOWN;
-    // KBC_MUTE#
-    GPCRJ1 = GPIO_IN;
-    // ME_WE
-    GPCRJ2 = GPIO_OUT;
-    // SOC_TYPE
-    GPCRJ3 = GPIO_IN;
-    // WLAN_PWR_EN
-    GPCRJ4 = GPIO_OUT;
-    // KBLIGHT_ADJ
-    GPCRJ5 = GPIO_ALT;
-    // 3G_PWR_EN
-    GPCRJ6 = GPIO_OUT;
-    // NC
-    GPCRJ7 = GPIO_IN;
-    // LPC_AD0
-    GPCRM0 = GPIO_ALT;
-    // LPC_AD1
-    GPCRM1 = GPIO_ALT;
-    // LPC_AD2
-    GPCRM2 = GPIO_ALT;
-    // LPC_AD3
-    GPCRM3 = GPIO_ALT;
-    // PCLK_KBC
-    GPCRM4 = GPIO_ALT;
-    // LPC_FRAME#
-    GPCRM5 = GPIO_ALT;
-    // SERIRQ
-    GPCRM6 = GPIO_ALT;
+    GPCRA0 = GPIO_ALT;		// fan 0 set speed
+    GPCRA1 = GPIO_ALT;		// fan 1 set speed
+    GPCRA2 = GPIO_ALT;		// notification LED blue
+    GPCRA3 = GPIO_ALT;		// notification LED green
+    GPCRA4 = GPIO_ALT;		// notification LED red
+    GPCRA5 = GPIO_ALT;		// power/charging LED brightness
+    GPCRA6 = GPIO_OUT;		// keyboard backlight
+    GPCRA7 = GPIO_IN;		// V1.05A_PWRGD
+
+    // GPIO port B
+    GPDRB = (1 << 6) | (1 << 2);
+
+    GPCRB0 = GPIO_IN;		// PM_SLP_S0#
+    GPCRB1 = GPIO_OUT;		// capslock LED
+    GPCRB2 = GPIO_OUT;		// NA (SYS_RST)
+    GPCRB3 = GPIO_ALT;		// SMB_CLK_BT - battery gas gauge
+    GPCRB4 = GPIO_ALT;		// SMB_DATA_BT - battery gas gauge
+    GPCRB5 = GPIO_OUT;		// ALL_SYS_PWRGD_VRON
+    GPCRB6 = GPIO_OUT;		// EC_PCH_RCIN#
+    GPCRB7 = GPIO_OUT;		// PM_RSMRST#
+
+    // GPIO port C
+    GPDRC = (1 << 5) | (0x80);		// disable power LED
+
+    GPCRC0 = GPIO_OUT;		// POWER_TP_ON, touchpad power on
+    GPCRC1 = GPIO_ALT;		// I2C_CLK1, NA
+    GPCRC2 = GPIO_ALT;		// I2C_DATA1, NA
+    GPCRC3 = GPIO_IN;		// PM_SLP_SUS#, NA
+    GPCRC4 = GPIO_OUT;		// AC_PRESENT
+    GPCRC5 = GPIO_OUT;		// pwr/charging white LED enable
+    GPCRC6 = GPIO_OUT;		// GBit LAN port power supply enable/disable
+    GPCRC7 = GPIO_OUT;		// W_DISABLE2 on WiFi/BT M.2 slot
+
+    // GPIO port D
+    //GPDRD = (1 << 4) | (1 << 3) | (0x80);
+    GPDRD = (uint8_t) 0x98U;
+
+    GPCRD0 = GPIO_OUT;		// WiFi/BT M.2 power supply on/off
+    GPCRD1 = GPIO_IN;		// DDR3VR_PWRGD
+    GPCRD2 = GPIO_ALT;		// PLT_RST_BUF#, LPC reset
+    GPCRD3 = GPIO_OUT;		// SMC_RUNTIME_SCI#
+    GPCRD4 = GPIO_OUT;		// SMC_EXTSMI#
+    GPCRD5 = GPIO_OUT;		// W_DISABLE1 on WiFi/BT M.2 slot
+    GPCRD6 = GPIO_ALT;		// fan 0 tacho input
+    GPCRD7 = GPIO_ALT;		// fan 1 tacho input
+
+    // GPIO port E
+    GPDRE = (1 << 0) | (1 << 1) | (1 << 3) | 0x80 /*(1U << 7)*/;	// disable BAT_LOW
+
+    GPCRE0 = GPIO_OUT;		// LCD LED backlight enable
+    GPCRE1 = GPIO_OUT;		// system power off, SMC_SHUTDOWN#
+    GPCRE2 = GPIO_IN;		// V0.95A_PWRGD
+    GPCRE3 = GPIO_OUT;		// audio codec power down, EC_MUTE#
+    GPCRE4 = GPIO_IN;		// power status feedback, systems powered on
+    GPCRE5 = GPIO_OUT;		// ROP_SYS_PWROK, SYS_PWROK on main CPU
+    GPCRE6 = GPIO_IN;		// PM_SUS_STAT#
+    GPCRE7 = GPIO_OUT;		// PM_BATLOW#
+    
+    // GPIO port F
+    GPDRF = (1 << 5);
+
+    GPCRF0 = GPIO_OUT;		// audio codec SPDIF0/GPIO2 -> toggle for headphone mic input
+    GPCRF1 = GPIO_OUT;		// +V0.95A_EN
+    GPCRF2 = GPIO_OUT;		// ROP_VCCST_PWRGD
+    GPCRF3 = GPIO_OUT;		// WiFi/BT HKS white LED enable
+    GPCRF4 = GPIO_OUT;		// ME_FLASH
+    GPCRF5 = GPIO_OUT;		// A_POWER_OK -> DSW_PWROK
+    GPCRF6 = GPIO_ALT;		// H_PECI_EC
+    GPCRF7 = GPIO_IN;		// NA
+    
+    // GPIO port G
+    GPDRG = 0x00;
+
+    GPCRG1 = GPIO_OUT;		// PCH_PWROK
+    GPCRG6 = GPIO_OUT;		// V1.05A_EN
+    
+    // GPIO port H
+    GPDRH = (1 << 4) | (1 << 3);
+
+    GPCRH0 = GPIO_ALT;		// LPC_CLKRUN#
+    GPCRH1 = GPIO_ALT;		// I2C CLK, BQ24715 battery charge controller
+    GPCRH2 = GPIO_ALT;		// I2C DATA, BQ24715 battery charge controller
+    GPCRH3 = GPIO_OUT;		// BLCTL, LCD LED backlight control, NA
+    GPCRH4 = GPIO_OUT;		// PM_EC_PWRBTN#
+    GPCRH5 = GPIO_IN;		// TYPE_EC_IRQ -> type-C ALERT#
+    GPCRH6 = GPIO_IN;		// LCD lid open/close switch
+    GPCRH7 = GPIO_IN;		// NA
+    
+    // GPIO port I
+    GPDRI = (1U << 7);
+
+    GPCRI0 = GPIO_ALT;		// Chager_IOUT, BQ24715 IOUT, analog charge/discharge current
+    GPCRI1 = GPIO_ALT;		// +VBAT analog input
+    GPCRI2 = GPIO_IN;		// battery pack detect
+    GPCRI3 = GPIO_IN;		// PM_SLP_S4#
+    GPCRI4 = GPIO_IN;		// PM_SLP_S3#
+    GPCRI5 = GPIO_IN;		// ADP_IN#, DC adapter (charger) present
+    GPCRI6 = GPIO_IN;		// 3.5mm jack headphone detect
+    GPCRI7 = GPIO_OUT;		// type-C USB port 5V power enable
+    
+    // GPIO port J
+    GPDRJ = (1 << 4) | (1 << 5); // LEDs have negative logic, turn off, default 2S CELL
+
+    GPCRJ0 = GPIO_OUT;		// PROCHOT#_EC, device overheat
+    GPCRJ1 = GPIO_OUT;		// DIS_BAT, CELL config for charge controller
+    GPCRJ2 = GPIO_OUT;		// camera power on
+    GPCRJ3 = GPIO_IN;		// NA
+    GPCRJ4 = GPIO_OUT;		// power/chargeing LED green enable/disable
+    GPCRJ5 = GPIO_OUT;		// power/chargeing LED orange enable/disable
+
+    // GPIO port M
+    GPDRM = 0x00;
+
+    GPCRM0 = GPIO_ALT;		// LPC_AD0
+    GPCRM1 = GPIO_ALT;		// LPC_AD1
+    GPCRM2 = GPIO_ALT;		// LPC_AD2
+    GPCRM3 = GPIO_ALT;		// LPC_AD3
+    GPCRM4 = GPIO_ALT;		// EC_LPC_CLK
+    GPCRM5 = GPIO_ALT;		// LPC_FRAME#
+    GPCRM6 = GPIO_ALT;		// LPC_SERIRQ
+
 }
 
 #if GPIO_DEBUG
