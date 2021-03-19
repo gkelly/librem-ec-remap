@@ -22,6 +22,7 @@ BUILD=build/$(BOARD)/$(VERSION)
 # Default target - build the board's EC firmware
 all: $(BUILD)/ec.rom
 	$(info Built '$(VERSION)' for '$(BOARD)')
+	makebin -s 1048576 < $(BUILD)/ec.ihx > $(BUILD)/ec-1M.rom
 
 # Include common source
 COMMON_DIR=src/common
