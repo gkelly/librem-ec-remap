@@ -25,7 +25,7 @@ INCLUDE+=$(wildcard $(PURISM_COMMON_DIR)/include/common/*.h) $(PURISM_COMMON_DIR
 CFLAGS+=-I$(PURISM_COMMON_DIR)/include
 
 # Add charger
-CHARGER?=bq24780s
+CHARGER?=bq24715
 SRC+=$(PURISM_COMMON_DIR)/charger/$(CHARGER).c
 
 # Add kbled
