@@ -14,6 +14,7 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <common/debug.h>
+#include <ec/pwm.h>
 
 #include <ec/espi.h>
 #if EC_ESPI
@@ -31,11 +32,11 @@
 #endif
 
 #ifndef HAVE_EC_EN
-    #define HAVE_EC_EN 1
+    #define HAVE_EC_EN 0
 #endif
 
 #ifndef HAVE_LAN_WAKEUP_N
-    #define HAVE_LAN_WAKEUP_N 1
+    #define HAVE_LAN_WAKEUP_N 0
 #endif
 
 #ifndef HAVE_LED_BAT_CHG
@@ -54,23 +55,19 @@
     #define HAVE_PCH_PWROK_EC 1
 #endif
 
-#ifndef HAVE_SLP_SUS_N
-    #define HAVE_SLP_SUS_N 1
-#endif
-
 #ifndef HAVE_XLP_OUT
     #define HAVE_XLP_OUT 1
 #endif
 #ifndef HAVE_SUSWARN_N
-    #define HAVE_SUSWARN_N 1
+    #define HAVE_SUSWARN_N 0
 #endif
 
 #ifndef HAVE_SUS_PWR_ACK
-    #define HAVE_SUS_PWR_ACK 1
+    #define HAVE_SUS_PWR_ACK 0
 #endif
 
 #ifndef HAVE_VA_EC_EN
-    #define HAVE_VA_EC_EN 1
+    #define HAVE_VA_EC_EN 0
 #endif
 
 #ifndef HAVE_XLP_OUT
@@ -119,14 +116,13 @@ extern uint8_t main_cycle;
 enum PowerState power_state = POWER_STATE_DEFAULT;
 
 enum PowerState calculate_power_state(void) {
-    //TODO: Deep Sx states using SLP_SUS#
 
-    if (gpio_get(&SUSB_N_PCH)) {
+    if (gpio_get(&PM_SLP_S3_N)) {
         // S3, S4, and S5 planes powered
         return POWER_STATE_S0;
     }
 
-    if (gpio_get(&SUSC_N_PCH)) {
+    if (gpio_get(&PM_SLP_S4_N)) {
         // S4 and S5 planes powered
         return POWER_STATE_S3;
     }
@@ -135,7 +131,6 @@ enum PowerState calculate_power_state(void) {
         // S5 plane powered
         return POWER_STATE_S5;
     }
-
 #if HAVE_PCH_DPWROK_EC && DEEP_SX
     if (!gpio_get(&PCH_DPWROK_EC)) {
         return POWER_STATE_DEFAULT;
@@ -214,41 +209,6 @@ void power_on_ds5(void) {
 void power_on_s5(void) {
     DEBUG("%02X: power_on_s5\n", main_cycle);
 
-#if DEEP_SX
-    // See Figure 12-18 in Whiskey Lake Platform Design Guide
-    // TODO - signal timing graph
-    // See Figure 12-24 in Whiskey Lake Platform Design Guide
-    // TODO - rail timing graph
-
-    // TODO: Must have SL_SUS# set high by PCH
-
-#if HAVE_VA_EC_EN
-    // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
-    // avoid leakage
-    GPIO_SET_DEBUG(VA_EC_EN, true);
-#endif // HAVE_VA_EC_EN
-    tPCH06;
-
-    // Enable VDD5
-    GPIO_SET_DEBUG(DD_ON, true);
-
-    //TODO: Should SUS_ACK# be de-asserted here?
-    tPCH03;
-
-    // De-assert RSMRST#
-    GPIO_SET_DEBUG(EC_RSMRST_N, true);
-
-    // Wait for PCH stability
-    tPCH18;
-
-#if HAVE_EC_EN
-    // Allow processor to control SUSB# and SUSC#
-    GPIO_SET_DEBUG(EC_EN, true);
-#endif // HAVE_EC_EN
-
-    // Extra wait - TODO remove
-    delay_ms(200);
-#else // DEEP_SX
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // TODO - signal timing graph
     // See Figure 12-25 in Whiskey Lake Platform Design Guide
@@ -258,26 +218,55 @@ void power_on_s5(void) {
     // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
     // avoid leakage
     GPIO_SET_DEBUG(VA_EC_EN, true);
+    delay_ms(1);
 #endif // HAVE_VA_EC_EN
+    GPIO_SET_DEBUG(V105A_EN, true);
+    GPIO_SET_DEBUG(V095A_EN, true);
+    delay_ms(1);
+
+    {
+        int i=0;
+        while (i++ < 100 && !gpio_get(&V095A_PWRGD) && !gpio_get(&V105A_PWRGD))
+            delay_ms(10);
+        DEBUG("095 105 PGD i=%d\n", i);
+    }
+#if 0
+    {
+        int i=0;
+        while (i++ < 1000 && !gpio_get(&DDR3VR_PWRGD))
+            delay_ms(10);
+        DEBUG("DDR3V3 i=%d\n", i);
+    }
+#endif
+    DEBUG("1 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
+    tPCH06; //
+    GPIO_SET_DEBUG(ROP_VCCST_PWRGD, true)
+
+    DEBUG("2 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     tPCH06;
+    GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, true);
 
     // Enable VDD5
     GPIO_SET_DEBUG(DD_ON, true);
 
+    DEBUG("3 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 #if HAVE_SUS_PWR_ACK
     // De-assert SUS_ACK# - TODO is this needed on non-dsx?
     GPIO_SET_DEBUG(SUS_PWR_ACK, true);
 #endif // HAVE_SUS_PWR_ACK
     tPCH03;
 
+    DEBUG("4 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 #if HAVE_PCH_DPWROK_EC
     // Assert DSW_PWROK
     GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
 #endif // HAVE_PCH_DPWROK_EC
 
+    DEBUG("5 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     // De-assert RSMRST#
     GPIO_SET_DEBUG(EC_RSMRST_N, true);
 
+    DEBUG("6 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     // Wait for PCH stability
     tPCH18;
 
@@ -288,6 +277,8 @@ void power_on_s5(void) {
 
     // Wait for SUSPWRDNACK validity
     tPLT01;
+
+    DEBUG("7 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 
     for (int i = 0; i < 1000; i++) {
         // If we reached S0, exit this loop
@@ -303,14 +294,28 @@ void power_on_s5(void) {
 
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
+        DEBUG("%d DDR3V3 %d\n", (i+8), gpio_get(&DDR3VR_PWRGD));
     }
-#endif // DEEP_SX
+
+    DEBUG(">i DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
+
+    GPIO_SET_DEBUG(POWER_TP_ON, true);
+    GPIO_SET_DEBUG(CCD_EN, true);
+    GPIO_SET_DEBUG(POWER_ETH_ON, true);
+    GPIO_SET_DEBUG(WLAN_PWR_EN, true);
+    GPIO_SET_DEBUG(LED_AIRPLANE_N, true);
 
     update_power_state();
 }
 
 void power_off_s5(void) {
     DEBUG("%02X: power_off_s5\n", main_cycle);
+
+    GPIO_SET_DEBUG(POWER_TP_ON, false);		// no need for TP in S5
+    GPIO_SET_DEBUG(CCD_EN, false);		// no need for camera in S5
+    GPIO_SET_DEBUG(POWER_ETH_ON, false);	// power off ethernet
+    GPIO_SET_DEBUG(WLAN_PWR_EN, false);		// power down WiFi/BT
+    GPIO_SET_DEBUG(LED_AIRPLANE_N, false);
 
 #if DEEP_SX
     // TODO
@@ -331,9 +336,11 @@ void power_off_s5(void) {
     // De-assert RSMRST#
     GPIO_SET_DEBUG(EC_RSMRST_N, false);
 
-    // Disable VDD5
-    GPIO_SET_DEBUG(DD_ON, false);
     tPCH12;
+
+    GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, false);
+    GPIO_SET_DEBUG(V095A_EN, false);
+    GPIO_SET_DEBUG(V105A_EN, false);
 
 #if HAVE_VA_EC_EN
     // Disable VCCPRIM_* planes
@@ -347,6 +354,16 @@ void power_off_s5(void) {
     tPCH14;
 #endif // DEEP_SX
 
+#if 0
+    // if charger is not plugged in then off means off,
+    // else keep EC powered for eventual battery charge
+    // ToDo XXX - this needs to go somewhere else
+    if (gpio_get(&ACIN_N)) {
+        GPIO_SET_DEBUG(SMC_SHUTDOWN_N, false);
+    } else {
+        GPIO_SET_DEBUG(SMC_SHUTDOWN_N, true);
+    }
+#endif
     update_power_state();
 }
 
@@ -453,17 +470,21 @@ void power_event(void) {
             DEBUG("%02X: Power switch release\n", main_cycle);
         }
     #endif
-    ps_last = ps_new;
-
-    // Send power signal to PCH
-    gpio_set(&PWR_BTN_N, ps_new);
+    if (ps_last != ps_new) {
+        // Send power signal to PCH
+        //gpio_set(&PWR_BTN_N, ps_new);
+        GPIO_SET_DEBUG(PWR_BTN_N, ps_new);
+        ps_last = ps_new;
+        delay_ms(1);
+    }
 
     // Update power state before determining actions
     update_power_state();
 
     // If system power is good
     static bool pg_last = false;
-    bool pg_new = gpio_get(&ALL_SYS_PWRGD);
+    //bool pg_new = gpio_get(&ALL_SYS_PWRGD);
+    bool pg_new = gpio_get(&V095A_PWRGD) && gpio_get(&V105A_PWRGD);
     if (pg_new && !pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
 
@@ -566,6 +587,7 @@ void power_event(void) {
 #endif // HAVE_LAN_WAKEUP_N
 
     static uint32_t last_time = 0;
+    static bool dimdir=true;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
 #if EC_ESPI
@@ -579,16 +601,21 @@ void power_event(void) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
                 last_time = time;
             }
-            gpio_set(&LED_ACIN, false);
+            //gpio_set(&LED_ACIN, false);
         } else
 #endif
         {
-            // CPU on, green light
-            gpio_set(&LED_PWR, true);
-            gpio_set(&LED_ACIN, false);
+            // CPU on, white LED on, full brightness
+            if (gpio_get(&LED_BAT_CHG))
+                gpio_set(&LED_PWR, false);
+            else
+                gpio_set(&LED_PWR, true);
+            DCR5 = 0xff;
+            //gpio_set(&LED_ACIN, false);
         }
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
+#if 0
         if (
             (time < last_time) // overflow
             ||
@@ -597,23 +624,30 @@ void power_event(void) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
             last_time = time;
         }
-        gpio_set(&LED_ACIN, false);
+        //gpio_set(&LED_ACIN, false);
+#else
+        DCR5 += dimdir ? 1 : -1;
+        if (DCR5 == 0xff)
+            dimdir = false;
+        if (DCR5 == 0x00)
+            dimdir = true;
+#endif
     } else if (!ac_new) {
-        // AC plugged in, orange light
-        gpio_set(&LED_PWR, false);
-        gpio_set(&LED_ACIN, true);
+        // AC plugged in, but in < S3, white LED off
+        gpio_set(&LED_PWR, true);
     } else {
         // CPU off and AC adapter unplugged, flashing orange light
-        gpio_set(&LED_PWR, false);
+        gpio_set(&LED_PWR, true);
         if (
             (time < last_time) // overflow
             ||
             (time >= (last_time + 1000)) // timeout
         ) {
-            gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
             last_time = time;
         }
 
+        if (!gpio_get(&ALL_SYS_PWRGD_VRON))
+            GPIO_SET_DEBUG(SMC_SHUTDOWN_N, false); // XXX
 #if HAVE_XLP_OUT
         // Power off VDD3 if system should be off
         gpio_set(&XLP_OUT, 0);
@@ -621,7 +655,8 @@ void power_event(void) {
     }
 
 //TODO: do not require both LEDs
-#if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
+//#if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
+#if 0
     if (!(battery_status & BATTERY_INITIALIZED)) {
         // No battery connected
         gpio_set(&LED_BAT_CHG, false);
