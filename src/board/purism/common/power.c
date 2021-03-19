@@ -364,7 +364,12 @@ void power_cpu_reset(void) {
 
 static bool power_button_disabled(void) {
     // Disable power button if lid is closed and AC is disconnected
+#ifdef HAVE_LID_SW_N
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
+#endif
+#ifdef HAVE_LID_SW
+    return gpio_get(&LID_SW) && gpio_get(&ACIN_N);
+#endif
 }
 
 void power_event(void) {

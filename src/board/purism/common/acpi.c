@@ -83,7 +83,11 @@ uint8_t acpi_read(uint8_t addr) {
     switch (addr) {
         // Lid state and other flags
         case 0x03:
+#ifdef HAVE_LID_SW_N
             if (gpio_get(&LID_SW_N)) {
+#else
+            if (!gpio_get(&LID_SW)) {
+#endif
                 // Lid is open
                 data |= 1 << 0;
             }
