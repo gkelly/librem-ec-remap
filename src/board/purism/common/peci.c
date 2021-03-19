@@ -24,8 +24,8 @@ static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
 
 static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 
-// Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
-#define T_JUNCTION 100
+// Tjunction = 120C for i7-10710U (and probably the same for all CML-U)
+#define T_JUNCTION 120
 
 int16_t peci_temp = 0;
 
