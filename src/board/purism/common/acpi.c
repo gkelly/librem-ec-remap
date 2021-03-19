@@ -2,7 +2,6 @@
 
 #include <board/acpi.h>
 #include <board/battery.h>
-#include <board/dgpu.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
@@ -141,12 +140,6 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8(0xCE, DCR2);
         ACPI_8(0xD0, F1TLRR);
         ACPI_8(0xD1, F1TMRR);
-#if HAVE_DGPU
-        ACPI_8(0xCD, dgpu_temp);
-        ACPI_8(0xCF, DCR4);
-        ACPI_8(0xD2, F2TLRR);
-        ACPI_8(0xD3, F2TMRR);
-#endif // HAVE_DGPU
 
 #if HAVE_LED_AIRPLANE_N
         // Airplane mode LED
