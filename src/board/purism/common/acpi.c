@@ -112,7 +112,7 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_16(0x16, battery_design_capacity);
         ACPI_16(0x1A, battery_full_capacity);
-        ACPI_16(0x22, battery_design_voltage);
+        ACPI_16(0x22, battery_min_voltage);
 
         case 0x26:
             // If AC adapter connected
