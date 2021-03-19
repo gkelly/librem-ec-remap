@@ -22,8 +22,8 @@ void pwm_init(void) {
     // Set cycle time to 255 + 1
     CTR0 = 255;
 
-    // Turn off CPU fan (temperature control in peci_event)
-    DCR2 = 0;
+    // disable open drain for all channels
+    PWMODENR = 0x00;
 
     // Enable PWM
     ZTIER = (1 << 1);
