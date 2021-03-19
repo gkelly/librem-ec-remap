@@ -141,7 +141,9 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_8(0xCC, sci_extra);
 
-        ACPI_8(0xCE, DCR2);
+        // fan speed PWM
+        ACPI_8(0xCE, DCR0);
+
         ACPI_8(0xD0, F1TLRR);
         ACPI_8(0xD1, F1TMRR);
 

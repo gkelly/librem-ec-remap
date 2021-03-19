@@ -178,8 +178,9 @@ void peci_event(void) {
         duty = fan_cooldown(&FAN, duty);
     }
 
-    if (duty != DCR2) {
-        DCR2 = duty;
+    if (duty != DCR0 || duty != DCR1) {
+        DCR0 = duty;
+        DCR1 = duty;
         DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
     }
 }
