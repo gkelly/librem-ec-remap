@@ -92,4 +92,18 @@ static uint16_t cled=0;
 }
 
 // called once per second
-void board_1s_event(void) {}
+void board_1s_event(void) {
+    if (power_state == POWER_STATE_S0) {
+        if (!gpio_get(&HEADPHONE_DET)) {
+            DEBUG("HP\n");
+            // there is a pull up so setting it as input will pull it high too
+            GPCRF0 = GPIO_IN;
+        } else {
+            DEBUG("!HP\n");
+            // pin state is false by GPIO init, so just reenable output to pull it low
+            GPCRF0 = GPIO_OUT;
+        }
+    } else {
+        gpio_set(&MIC_SELECT, false);
+	}
+}

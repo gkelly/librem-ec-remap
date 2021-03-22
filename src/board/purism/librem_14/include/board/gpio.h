@@ -65,6 +65,8 @@ extern struct Gpio __code POWER_TP_ON;
 extern struct Gpio __code KBD_BACKLIGHT_EN;
 extern struct Gpio __code SMC_SHUTDOWN_N;
 extern struct Gpio __code CHG_CELL_CFG;
+extern struct Gpio __code HEADPHONE_DET;
+extern struct Gpio __code MIC_SELECT;
 
 #define HAVE_XLP_OUT 0
 
