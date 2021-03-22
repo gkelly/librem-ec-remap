@@ -146,6 +146,9 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_8(0xD0, F1TLRR);
         ACPI_8(0xD1, F1TMRR);
+        ACPI_8(0xCF, DCR1);
+        ACPI_8(0xD2, F2TLRR);
+        ACPI_8(0xD3, F2TMRR);
 
 #if HAVE_LED_AIRPLANE_N
         // Airplane mode LED
@@ -155,6 +158,11 @@ uint8_t acpi_read(uint8_t addr) {
             }
             break;
 #endif // HAVE_LED_AIRPLANE_N
+
+        // RGB notification LED
+        ACPI_8(0xDA, DCR4);
+        ACPI_8(0xDB, DCR3);
+        ACPI_8(0xDC, DCR2);
 
         // Set size of flash (from old firmware)
         ACPI_8 (0xE5, 0x80);
@@ -198,6 +206,17 @@ void acpi_write(uint8_t addr, uint8_t data) {
             gpio_set(&LED_AIRPLANE_N, !(bool)(data & (1 << 6)));
             break;
 #endif
+
+        // RGB notification LED
+        case 0xDA:
+            DCR4 = data;
+            break;
+        case 0xDB:
+            DCR3 = data;
+            break;
+        case 0xDC:
+            DCR2 = data;
+            break;
 
         case 0xF8:
             fcmd = data;
