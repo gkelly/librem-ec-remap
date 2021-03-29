@@ -7,10 +7,20 @@
 
 // Channel 0 clock prescaler register
 volatile uint8_t __xdata __at(0x1800) C0CPRS;
+// Channel 4 clock prescaler register (low byte)
+volatile uint8_t __xdata __at(0x1827) C4CPRS;
+// Channel 4 clock prescaler register (high byte)
+volatile uint8_t __xdata __at(0x1828) C4MCPRS;
 // Channel 6 clock prescaler register (low byte)
 volatile uint8_t __xdata __at(0x182B) C6CPRS;
 // Channel 6 clock prescaler register (high byte)
 volatile uint8_t __xdata __at(0x182C) C6MCPRS;
+// Channel 7 clock prescaler register (low byte)
+volatile uint8_t __xdata __at(0x182D) C7CPRS;
+// Channel 7 clock prescaler register (high byte)
+volatile uint8_t __xdata __at(0x182E) C7MCPRS;
+// PWM Clock 6MHz Select Register
+volatile uint8_t __xdata __at(0x1840) CLK6MSEL;
 
 // Cycle Time 0
 volatile uint8_t __xdata __at(0x1801) CTR0;
