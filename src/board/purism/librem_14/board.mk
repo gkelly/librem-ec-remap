@@ -7,7 +7,7 @@ KEYMAP?=default
 SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
 
 # Set keyboard LED mechanism
-KBLED=white_gpio
+KBLED=white_pwm
 
 # Set charger I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_3

@@ -4,7 +4,6 @@
 #include <ec/pwm.h>
 #include <common/debug.h>
 
-
 void kbled_init(void) {
     DEBUG("kbled_init\n");
     //TODO: enable PWMs

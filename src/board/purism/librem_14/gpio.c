@@ -58,7 +58,7 @@ void gpio_init() {
     GPCRA3 = GPIO_ALT;		// notification LED green
     GPCRA4 = GPIO_ALT;		// notification LED red
     GPCRA5 = GPIO_ALT;		// power/charging LED brightness
-    GPCRA6 = GPIO_OUT;		// keyboard backlight
+    GPCRA6 = GPIO_ALT;		// keyboard backlight
     GPCRA7 = GPIO_IN;		// V1.05A_PWRGD
 
     // GPIO port B
