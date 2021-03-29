@@ -159,8 +159,8 @@ void gpio_init() {
     GPCRJ1 = GPIO_OUT;		// DIS_BAT, CELL config for charge controller
     GPCRJ2 = GPIO_OUT;		// camera power on
     GPCRJ3 = GPIO_IN;		// NA
-    GPCRJ4 = GPIO_OUT;		// power/chargeing LED green enable/disable
-    GPCRJ5 = GPIO_OUT;		// power/chargeing LED orange enable/disable
+    GPCRJ4 = GPIO_OUT;		// power/charging LED green enable/disable
+    GPCRJ5 = GPIO_OUT;		// power/charging LED orange enable/disable
 
     // GPIO port M
     GPDRM = 0x00;
