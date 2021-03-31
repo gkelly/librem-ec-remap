@@ -5,11 +5,9 @@
 
 static int LEVEL_I = 1;
 static const uint8_t __code LEVELS[] = {
-    48,
-    72,
-    96,
-    144,
-    192,
+    128,
+    172,
+    215,
     255
 };
 
@@ -36,6 +34,8 @@ void kbled_hotkey_color(void) {
 void kbled_hotkey_down(void) {
     if (LEVEL_I > 0) {
         LEVEL_I -= 1;
+    } else {
+        LEVEL_I = ARRAY_SIZE(LEVELS) - 1;
     }
     kbled_set(LEVELS[LEVEL_I]);
 }
@@ -43,6 +43,8 @@ void kbled_hotkey_down(void) {
 void kbled_hotkey_up(void) {
     if (LEVEL_I < (ARRAY_SIZE(LEVELS) - 1)) {
         LEVEL_I += 1;
+    } else {
+        LEVEL_I = 0;
     }
     kbled_set(LEVELS[LEVEL_I]);
 }
