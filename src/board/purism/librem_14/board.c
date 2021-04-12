@@ -79,16 +79,7 @@ void board_on_ac(bool ac) {
 
 // called every main loop cycle, careful
 void board_event(void) {
-static uint16_t cled=0;
 
-#if 0
-    DCR2 = (cled & 0x0300) == 0 ? (cled & 0xff) : 0x00;
-    DCR3 = (cled & 0x0300) == 0x0100 ? (cled & 0xff) : 0x00;
-    DCR4 = (cled & 0x0300) == 0x0200 ? (cled & 0xff) : 0x00;
-    cled++;
-    if (cled > (3 * 0xff))
-        cled=0;
-#endif
 }
 
 // called once per second
