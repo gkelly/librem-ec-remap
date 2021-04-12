@@ -4,6 +4,7 @@
 #include <board/board.h>
 #include <board/gpio.h>
 #include <board/power.h>
+#include <board/kbc.h>
 #include <ec/pwm.h>
 #include <ec/adc.h>
 #include <common/debug.h>
@@ -40,9 +41,9 @@ void board_init(void) {
     GCR2 |= (1 << 5); // SMB3E
 
     // PWMs
-    // Turn on CPU fan a bit (further temperature control in peci_event)
-    DCR0 = 0x50;
-    DCR1 = 0x50;
+    // Turn off fans, get controlled by PECI
+    DCR0 = 0x00;
+    DCR1 = 0x00;
 
     // turn off notification LED RGB
     DCR2 = 0x00; // B
@@ -52,8 +53,8 @@ void board_init(void) {
     // enable power LED control full brightness
     DCR5 = 0xff;
 
-    // enable keyboard backlight
-    DCR6 = 0xff;
+    // keyboard backlight PWM, zero at init
+    DCR6 = 0x00;
 
     board_battery_init();
     battery_reset();
