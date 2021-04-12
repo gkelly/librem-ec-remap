@@ -303,7 +303,7 @@ void power_on_s5(void) {
     GPIO_SET_DEBUG(CCD_EN, true);
     GPIO_SET_DEBUG(POWER_ETH_ON, true);
     GPIO_SET_DEBUG(WLAN_PWR_EN, true);
-    GPIO_SET_DEBUG(LED_AIRPLANE_N, true);
+    GPIO_SET_DEBUG(LED_AIRPLANE, true);
 
     update_power_state();
 }
@@ -315,7 +315,7 @@ void power_off_s5(void) {
     GPIO_SET_DEBUG(CCD_EN, false);		// no need for camera in S5
     GPIO_SET_DEBUG(POWER_ETH_ON, false);	// power off ethernet
     GPIO_SET_DEBUG(WLAN_PWR_EN, false);		// power down WiFi/BT
-    GPIO_SET_DEBUG(LED_AIRPLANE_N, false);
+    GPIO_SET_DEBUG(LED_AIRPLANE, false);
 
 #if DEEP_SX
     // TODO
@@ -517,8 +517,7 @@ void power_event(void) {
         GPIO_SET_DEBUG(CCD_EN, true);
         GPIO_SET_DEBUG(POWER_ETH_ON, true);
         GPIO_SET_DEBUG(WLAN_PWR_EN, true);
-        GPIO_SET_DEBUG(LED_AIRPLANE_N, true);
-
+        GPIO_SET_DEBUG(LED_AIRPLANE, true);
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
@@ -540,7 +539,7 @@ void power_event(void) {
         GPIO_SET_DEBUG(CCD_EN, false);
         GPIO_SET_DEBUG(POWER_ETH_ON, false);
         GPIO_SET_DEBUG(WLAN_PWR_EN, false);
-        GPIO_SET_DEBUG(LED_AIRPLANE_N, false);
+        GPIO_SET_DEBUG(LED_AIRPLANE, false);
     }
     pg_last = pg_new;
 

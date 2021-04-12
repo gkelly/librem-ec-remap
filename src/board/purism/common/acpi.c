@@ -9,9 +9,9 @@
 #include <common/debug.h>
 #include <ec/pwm.h>
 
-#ifndef HAVE_LED_AIRPLANE_N
-#define HAVE_LED_AIRPLANE_N 1
-#endif // HAVE_LED_AIRPLANE_N
+#ifndef HAVE_LED_AIRPLANE
+#define HAVE_LED_AIRPLANE 1
+#endif // HAVE_LED_AIRPLANE
 
 extern uint8_t sci_extra;
 
@@ -58,10 +58,6 @@ void acpi_reset(void) {
     // ECOS: No ACPI or driver
     acpi_ecos = EC_OS_NONE;
 
-#if HAVE_LED_AIRPLANE_N
-    // Clear airplane mode LED
-    gpio_set(&LED_AIRPLANE_N, true);
-#endif
 }
 
 uint8_t acpi_read(uint8_t addr) {
@@ -150,14 +146,14 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8(0xD2, F2TLRR);
         ACPI_8(0xD3, F2TMRR);
 
-#if HAVE_LED_AIRPLANE_N
+#if HAVE_LED_AIRPLANE
         // Airplane mode LED
         case 0xD9:
-            if (!gpio_get(&LED_AIRPLANE_N)) {
+            if (!gpio_get(&LED_AIRPLANE)) {
                 data |= (1 << 6);
             }
             break;
-#endif // HAVE_LED_AIRPLANE_N
+#endif // HAVE_LED_AIRPLANE
 
         // RGB notification LED
         ACPI_8(0xDA, DCR4);
@@ -200,10 +196,10 @@ void acpi_write(uint8_t addr, uint8_t data) {
             battery_set_end_threshold(data);
             break;
 
-#if HAVE_LED_AIRPLANE_N
+#if HAVE_LED_AIRPLANE
         // Airplane mode LED
         case 0xD9:
-            gpio_set(&LED_AIRPLANE_N, !(bool)(data & (1 << 6)));
+            gpio_set(&LED_AIRPLANE, !(bool)(data & (1 << 6)));
             break;
 #endif
 

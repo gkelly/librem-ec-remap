@@ -25,7 +25,7 @@ extern struct Gpio __code DD_ON;
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;
 extern struct Gpio __code LAN_WAKEUP_N;
-extern struct Gpio __code LED_AIRPLANE_N;
+extern struct Gpio __code LED_AIRPLANE;
 extern struct Gpio __code LED_BAT_CHG;
 extern struct Gpio __code LED_BAT_WARN;
 extern struct Gpio __code LED_PWR;
