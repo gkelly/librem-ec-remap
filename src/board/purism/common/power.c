@@ -317,6 +317,11 @@ void power_off_s5(void) {
     GPIO_SET_DEBUG(WLAN_PWR_EN, false);		// power down WiFi/BT
     GPIO_SET_DEBUG(LED_AIRPLANE, false);
 
+    // turn off notification LED RGB
+    DCR2 = 0x00; // B
+    DCR3 = 0x00; // G
+    DCR4 = 0x00; // R
+    
 #if DEEP_SX
     // TODO
 #else // DEEP_SX
