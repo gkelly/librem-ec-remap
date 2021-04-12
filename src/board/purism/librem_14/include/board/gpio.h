@@ -29,6 +29,7 @@ extern struct Gpio __code LED_AIRPLANE;
 extern struct Gpio __code LED_BAT_CHG;
 extern struct Gpio __code LED_BAT_WARN;
 extern struct Gpio __code LED_PWR;
+extern struct Gpio __code LED_CAPS_LOCK;
 extern struct Gpio __code LID_SW;
 extern struct Gpio __code PCH_DPWROK_EC;
 extern struct Gpio __code PCH_PWROK_EC;

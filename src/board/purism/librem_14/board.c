@@ -79,7 +79,14 @@ void board_on_ac(bool ac) {
 
 // called every main loop cycle, careful
 void board_event(void) {
-
+    if (main_cycle == 0) {
+        // Set keyboard LEDs
+        static uint8_t last_kbc_leds = 0;
+        if (kbc_leds != last_kbc_leds) {
+            gpio_set(&LED_CAPS_LOCK, (kbc_leds & 4));
+            last_kbc_leds = kbc_leds;
+        }
+    }
 }
 
 // called once per second

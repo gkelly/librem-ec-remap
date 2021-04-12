@@ -15,6 +15,7 @@ struct Gpio __code LED_AIRPLANE =		GPIO(F, 3);	// WiFi HKS LED
 struct Gpio __code LED_BAT_CHG =		GPIO(J, 5);	// green LED
 struct Gpio __code LED_BAT_WARN =		GPIO(J, 4);	// orange LED
 struct Gpio __code LED_PWR =			GPIO(C, 5);
+struct Gpio __code LED_CAPS_LOCK =			GPIO(B, 1);
 struct Gpio __code LID_SW =				GPIO(H, 6);
 struct Gpio __code PCH_DPWROK_EC =		GPIO(F, 5);	// DSW_PWROK -> DPW_PWROK -> A_POWER_OK
 struct Gpio __code PCH_PWROK_EC =		GPIO(G, 1);
