@@ -14,7 +14,7 @@ void kbled_reset(void) {
     DEBUG("kbled_reset\n");
     // Set default brightness and color
     kbled_set_color(0xFFFFFF);
-    kbled_set(0x00);
+    kbled_set(0xfe);
 }
 
 uint8_t kbled_get(void) {

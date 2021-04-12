@@ -3,11 +3,13 @@
 #include <board/kbled.h>
 #include <common/macro.h>
 
-static int LEVEL_I = 1;
+static int LEVEL_I = 4;
 static const uint8_t __code LEVELS[] = {
+    0,
     128,
     172,
     215,
+    254,
     255
 };
 
