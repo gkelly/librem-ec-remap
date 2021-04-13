@@ -356,7 +356,7 @@ void kbscan_event(void) {
                         uint16_t key = 0;
                         keymap_get(key_layer, i, j, &key);
                         if (key) {
-                            DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
+                            // DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
                             if(!kbscan_press(key, new_b, &layer)){
                                 // In the case of ignored key press/release, reset bit
                                 reset = true;
