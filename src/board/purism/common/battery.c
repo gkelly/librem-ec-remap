@@ -34,6 +34,7 @@ bool battery_set_start_threshold(uint8_t value) {
         return false;
 
     battery_start_threshold = value;
+    bram_set_value((uint8_t)BRAM_CHARGE_START_THRES, battery_start_threshold);
     return true;
 }
 
@@ -48,6 +49,7 @@ bool battery_set_end_threshold(uint8_t value) {
         return false;
 
     battery_end_threshold = value;
+    bram_set_value((uint8_t)BRAM_CHARGE_END_THRES, battery_end_threshold);
     return true;
 }
 

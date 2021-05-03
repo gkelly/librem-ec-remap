@@ -7,9 +7,49 @@
 #include <board/kbc.h>
 #include <ec/pwm.h>
 #include <ec/adc.h>
+#include <ec/bram.h>
 #include <common/debug.h>
 
 extern uint8_t main_cycle;
+
+
+// persistent settings stored in BRAM bank#1 @ 0x80..0xbf
+#define BRAM_OFFSET 0x80
+#define BRAM_CHARGE_START_THRES		(BRAM_OFFSET + 0)
+#define BRAM_CHARGE_END_THRES		(BRAM_OFFSET + 1)
+
+// see if BRAM has valid content, if not clear it and mark
+bool bram_init(void) {
+    int i;
+    uint8_t sum=42;
+
+    for (i=0x80; i<(0xbf); i++)
+        sum ^= BRAM[i];
+    if (sum == BRAM[0xbf]) {
+        return true;
+    } else {
+        for (i=0x80; i<(0xbf); i++)
+            BRAM[i] = 0x00;
+        BRAM[0xbf] = 42;
+        return false;
+    }
+}
+
+bool bram_set_value(uint8_t offset, uint8_t value)
+{
+    int i;
+    uint8_t sum=42;
+
+    if (offset < 0x80)
+        return false;
+
+    BRAM[offset] = value;
+    for (i=0x80; i<(0xbf); i++)
+        sum ^= BRAM[i];
+    BRAM[0xbf] = sum;
+
+    return true;
+}
 
 void board_init(void) {
     // Enable camera
@@ -58,6 +98,11 @@ void board_init(void) {
 
     board_battery_init();
     battery_reset();
+
+    if (bram_init) {
+        battery_set_start_threshold(BRAM[BRAM_CHARGE_START_THRES]);
+        battery_set_end_threshold(BRAM[BRAM_CHARGE_END_THRES]);
+    }
 }
 
 void board_on_ac(bool ac) {
