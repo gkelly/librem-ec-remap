@@ -96,13 +96,16 @@ void board_init(void) {
     // keyboard backlight PWM, zero at init
     DCR6 = 0x00;
 
+    gpio_set(&LED_BAT_CHG, true);
+    gpio_set(&LED_BAT_WARN, true);
+    battery_charger_disable();
     board_battery_init();
-    battery_reset();
 
     if (bram_init) {
         battery_set_start_threshold(BRAM[BRAM_CHARGE_START_THRES]);
         battery_set_end_threshold(BRAM[BRAM_CHARGE_END_THRES]);
-    }
+    } else
+        battery_reset();
 }
 
 void board_on_ac(bool ac) {

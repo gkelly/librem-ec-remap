@@ -132,8 +132,8 @@ void battery_event(void) {
 
 void battery_reset(void) {
     battery_charger_disable();
-    battery_start_threshold = BATTERY_START_DEFAULT;
-    battery_end_threshold = BATTERY_END_DEFAULT;
+    battery_set_start_threshold(BATTERY_START_DEFAULT);
+    battery_set_end_threshold(BATTERY_END_DEFAULT);
     gpio_set(&LED_BAT_CHG, true);
     gpio_set(&LED_BAT_WARN, true);
 }
