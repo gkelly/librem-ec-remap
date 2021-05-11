@@ -635,10 +635,10 @@ void power_event(void) {
 #endif
         {
             // CPU on, white LED on, full brightness
-            if (gpio_get(&LED_BAT_CHG) || gpio_get(&LED_BAT_WARN))
-                gpio_set(&LED_PWR, false);
-            else
+            if (!gpio_get(&LED_BAT_CHG) || !gpio_get(&LED_BAT_WARN))
                 gpio_set(&LED_PWR, true);
+            else
+                gpio_set(&LED_PWR, false);
             DCR5 = 0xff;
             //gpio_set(&LED_ACIN, false);
         }
