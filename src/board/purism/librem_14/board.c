@@ -128,9 +128,10 @@ void board_on_ac(bool ac) {
 
 // called every main loop cycle, careful
 void board_event(void) {
+    static uint8_t last_kbc_leds = 0;
+
     if (main_cycle == 0) {
         // Set keyboard LEDs
-        static uint8_t last_kbc_leds = 0;
         if (kbc_leds != last_kbc_leds) {
             gpio_set(&LED_CAPS_LOCK, (kbc_leds & 4));
             last_kbc_leds = kbc_leds;
@@ -140,15 +141,22 @@ void board_event(void) {
 
 // called once per second
 void board_1s_event(void) {
+    static bool hp_det=false;
+
     if (power_state == POWER_STATE_S0) {
-        if (!gpio_get(&HEADPHONE_DET)) {
-            // there is a pull up so setting it as input will pull it high too
-            GPCRF0 = GPIO_IN;
-        } else {
-            // pin state is false by GPIO init, so just reenable output to pull it low
-            GPCRF0 = GPIO_OUT;
+        if (hp_det != !gpio_get(&HEADPHONE_DET)) {
+            hp_det = !gpio_get(&HEADPHONE_DET);
+            DEBUG("HP %s\n", hp_det ? "in" : "out");
+            if (hp_det) {
+                // there is a pull up so setting it as input will pull it high too
+                GPCRF0 = GPIO_IN;
+            } else {
+                // pin state is false by GPIO init, so just reenable output to pull it low
+                GPCRF0 = GPIO_OUT;
+            }
         }
     } else {
-        gpio_set(&MIC_SELECT, false);
-	}
+        // gpio_set(&MIC_SELECT, false);
+        GPCRF0 = GPIO_OUT;
+    }
 }
