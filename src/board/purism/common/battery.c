@@ -34,6 +34,7 @@ bool battery_set_start_threshold(uint8_t value) {
         return false;
 
     battery_start_threshold = value;
+    bram_set_value((uint8_t)BRAM_CHARGE_START_THRES, battery_start_threshold);
     return true;
 }
 
@@ -48,6 +49,7 @@ bool battery_set_end_threshold(uint8_t value) {
         return false;
 
     battery_end_threshold = value;
+    bram_set_value((uint8_t)BRAM_CHARGE_END_THRES, battery_end_threshold);
     return true;
 }
 
@@ -74,15 +76,24 @@ int battery_charger_configure(void) {
             power_state == POWER_STATE_S3 ||
             power_state == POWER_STATE_S0) {
             gpio_set(&LED_PWR, true);
+            gpio_set(&LED_BAT_WARN, true);
         }
         return battery_charger_enable();
     } else {
+        // charging has been stopped or interrupted -> clear flag
+        should_charge = false;
+        // set appropriate LED state
         gpio_set(&LED_BAT_CHG, true);
-        // turn power LED back on when not chargin
         if (power_state == POWER_STATE_DS3 ||
             power_state == POWER_STATE_S3 ||
             power_state == POWER_STATE_S0) {
-            gpio_set(&LED_PWR, false);
+            if (battery_charge < 20) {
+                gpio_set(&LED_BAT_WARN, false);
+                gpio_set(&LED_PWR, true);
+            } else {
+                gpio_set(&LED_PWR, false);
+                gpio_set(&LED_BAT_WARN, true);
+            }
         }
         return battery_charger_disable();
     }
@@ -112,10 +123,7 @@ bool battery_present = false;
 void battery_event(void) {
     if (battery_present) {
         board_battery_update_state(); // this will update all available runtime values
-        // DEBUG("BAT detect %s\n", board_battery_detect() ? "present" : "not present");
-        DEBUG("BAT %d mV %d mA %d %%\n", battery_voltage, battery_current, battery_charge);
-    } else {
-        DEBUG("BAT not present\n");
+        // DEBUG("BAT %d mV %d mA %d %%\n", battery_voltage, battery_current, battery_charge);
     }
 
     battery_charger_configure();
@@ -124,8 +132,8 @@ void battery_event(void) {
 
 void battery_reset(void) {
     battery_charger_disable();
-    battery_start_threshold = BATTERY_START_DEFAULT;
-    battery_end_threshold = BATTERY_END_DEFAULT;
+    battery_set_start_threshold(BATTERY_START_DEFAULT);
+    battery_set_end_threshold(BATTERY_END_DEFAULT);
     gpio_set(&LED_BAT_CHG, true);
     gpio_set(&LED_BAT_WARN, true);
 }

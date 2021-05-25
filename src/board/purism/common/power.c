@@ -436,7 +436,7 @@ void power_event(void) {
     bool ps_new = gpio_get(&PWR_SW_N);
     if (!ps_new && ps_last) {
         // Ensure press is not spurious
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10/*100*/; i++) {
             delay_ms(1);
             if (gpio_get(&PWR_SW_N) != ps_new) {
                 DEBUG("%02X: Spurious press\n", main_cycle);
@@ -635,10 +635,10 @@ void power_event(void) {
 #endif
         {
             // CPU on, white LED on, full brightness
-            if (gpio_get(&LED_BAT_CHG))
-                gpio_set(&LED_PWR, false);
-            else
+            if (!gpio_get(&LED_BAT_CHG) || !gpio_get(&LED_BAT_WARN))
                 gpio_set(&LED_PWR, true);
+            else
+                gpio_set(&LED_PWR, false);
             DCR5 = 0xff;
             //gpio_set(&LED_ACIN, false);
         }
