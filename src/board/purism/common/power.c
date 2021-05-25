@@ -236,11 +236,9 @@ void power_on_s5(void) {
 #endif
     DEBUG("1 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     tPCH06; //
-    GPIO_SET_DEBUG(ROP_VCCST_PWRGD, true)
 
     DEBUG("2 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     tPCH06;
-    GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, true);
 
     // Enable VDD5
     GPIO_SET_DEBUG(DD_ON, true);
