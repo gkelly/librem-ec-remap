@@ -51,10 +51,6 @@
     #define HAVE_PCH_DPWROK_EC 1
 #endif
 
-#ifndef HAVE_PCH_PWROK_EC
-    #define HAVE_PCH_PWROK_EC 1
-#endif
-
 #ifndef HAVE_XLP_OUT
     #define HAVE_XLP_OUT 1
 #endif
@@ -325,12 +321,7 @@ void power_off_s5(void) {
 #if DEEP_SX
     // TODO
 #else // DEEP_SX
-#if HAVE_PCH_PWROK_EC
-    // De-assert SYS_PWROK
-    GPIO_SET_DEBUG(PCH_PWROK_EC, false);
-#endif // HAVE_PCH_PWROK_EC
-
-    // De-assert PCH_PWROK
+    // De-assert PM_PWROK
     GPIO_SET_DEBUG(PM_PWROK, false);
 
 #if HAVE_EC_EN
@@ -508,11 +499,14 @@ void power_event(void) {
         // Set VR enable line (GPIO B5)
         GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, true);
 
-        // 100ms delay between ALL_SYS_PWRGD and PCH_PWROK, per PCIe spec
-        delay_ms(100);
+        // Wait for VR_READY / PCH_PWROK_EC to be asserted
+        while (!gpio_get(&PCH_PWROK_EC)) {
+            delay_ms(1);
+            DEBUG("Waiting on PCH_PWROK to assert\n");
+        }
 
-        //Assert PCH_PWROK (GPIO G1)
-        GPIO_SET_DEBUG(PCH_PWROK_EC, true);
+         // 100ms delay between PCH_PWROK and SYS_PWROK assertion
+        delay_ms(100);
 
         // Assert SYS_PWROK (GPIO E5); PCH will de-assert PLT_RST#
         GPIO_SET_DEBUG(PM_PWROK, true);

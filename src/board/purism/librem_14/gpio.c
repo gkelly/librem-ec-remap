@@ -126,7 +126,7 @@ void gpio_init() {
     // GPIO port G
     GPDRG = 0x00;
 
-    GPCRG1 = GPIO_OUT;		// PCH_PWROK
+    GPCRG1 = GPIO_IN;		// PCH_PWROK_EC
     GPCRG6 = GPIO_OUT;		// V1.05A_EN
     
     // GPIO port H
