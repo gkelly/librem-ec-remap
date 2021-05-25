@@ -293,12 +293,6 @@ void power_on_s5(void) {
 
     DEBUG(">i DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 
-    GPIO_SET_DEBUG(POWER_TP_ON, true);
-    GPIO_SET_DEBUG(CCD_EN, true);
-    GPIO_SET_DEBUG(POWER_ETH_ON, true);
-    GPIO_SET_DEBUG(WLAN_PWR_EN, true);
-    GPIO_SET_DEBUG(LED_AIRPLANE, true);
-
     update_power_state();
 }
 
