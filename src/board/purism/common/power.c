@@ -234,33 +234,27 @@ void power_on_s5(void) {
         DEBUG("DDR3V3 i=%d\n", i);
     }
 #endif
-    DEBUG("1 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     tPCH06; //
 
-    DEBUG("2 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     tPCH06;
 
     // Enable VDD5
     GPIO_SET_DEBUG(DD_ON, true);
 
-    DEBUG("3 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 #if HAVE_SUS_PWR_ACK
     // De-assert SUS_ACK# - TODO is this needed on non-dsx?
     GPIO_SET_DEBUG(SUS_PWR_ACK, true);
 #endif // HAVE_SUS_PWR_ACK
     tPCH03;
 
-    DEBUG("4 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 #if HAVE_PCH_DPWROK_EC
     // Assert DSW_PWROK
     GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
 #endif // HAVE_PCH_DPWROK_EC
 
-    DEBUG("5 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     // De-assert RSMRST#
     GPIO_SET_DEBUG(EC_RSMRST_N, true);
 
-    DEBUG("6 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     // Wait for PCH stability
     tPCH18;
 
@@ -271,8 +265,6 @@ void power_on_s5(void) {
 
     // Wait for SUSPWRDNACK validity
     tPLT01;
-
-    DEBUG("7 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 
     for (int i = 0; i < 1000; i++) {
         // If we reached S0, exit this loop
@@ -288,10 +280,7 @@ void power_on_s5(void) {
 
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
-        DEBUG("%d DDR3V3 %d\n", (i+8), gpio_get(&DDR3VR_PWRGD));
     }
-
-    DEBUG(">i DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 
     update_power_state();
 }
