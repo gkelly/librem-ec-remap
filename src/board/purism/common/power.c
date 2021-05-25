@@ -218,23 +218,6 @@ void power_on_s5(void) {
 #endif // HAVE_VA_EC_EN
     GPIO_SET_DEBUG(V105A_EN, true);
     GPIO_SET_DEBUG(V095A_EN, true);
-    delay_ms(1);
-
-    {
-        int i=0;
-        while (i++ < 100 && !gpio_get(&V095A_PWRGD) && !gpio_get(&V105A_PWRGD))
-            delay_ms(10);
-        DEBUG("095 105 PGD i=%d\n", i);
-    }
-#if 0
-    {
-        int i=0;
-        while (i++ < 1000 && !gpio_get(&DDR3VR_PWRGD))
-            delay_ms(10);
-        DEBUG("DDR3V3 i=%d\n", i);
-    }
-#endif
-    tPCH06; //
 
     tPCH06;
 
