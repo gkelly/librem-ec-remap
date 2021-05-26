@@ -218,51 +218,26 @@ void power_on_s5(void) {
 #endif // HAVE_VA_EC_EN
     GPIO_SET_DEBUG(V105A_EN, true);
     GPIO_SET_DEBUG(V095A_EN, true);
-    delay_ms(1);
 
-    {
-        int i=0;
-        while (i++ < 100 && !gpio_get(&V095A_PWRGD) && !gpio_get(&V105A_PWRGD))
-            delay_ms(10);
-        DEBUG("095 105 PGD i=%d\n", i);
-    }
-#if 0
-    {
-        int i=0;
-        while (i++ < 1000 && !gpio_get(&DDR3VR_PWRGD))
-            delay_ms(10);
-        DEBUG("DDR3V3 i=%d\n", i);
-    }
-#endif
-    DEBUG("1 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
-    tPCH06; //
-    GPIO_SET_DEBUG(ROP_VCCST_PWRGD, true)
-
-    DEBUG("2 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     tPCH06;
-    GPIO_SET_DEBUG(ALL_SYS_PWRGD_VRON, true);
 
     // Enable VDD5
     GPIO_SET_DEBUG(DD_ON, true);
 
-    DEBUG("3 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 #if HAVE_SUS_PWR_ACK
     // De-assert SUS_ACK# - TODO is this needed on non-dsx?
     GPIO_SET_DEBUG(SUS_PWR_ACK, true);
 #endif // HAVE_SUS_PWR_ACK
     tPCH03;
 
-    DEBUG("4 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 #if HAVE_PCH_DPWROK_EC
     // Assert DSW_PWROK
     GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
 #endif // HAVE_PCH_DPWROK_EC
 
-    DEBUG("5 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     // De-assert RSMRST#
     GPIO_SET_DEBUG(EC_RSMRST_N, true);
 
-    DEBUG("6 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
     // Wait for PCH stability
     tPCH18;
 
@@ -273,8 +248,6 @@ void power_on_s5(void) {
 
     // Wait for SUSPWRDNACK validity
     tPLT01;
-
-    DEBUG("7 DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
 
     for (int i = 0; i < 1000; i++) {
         // If we reached S0, exit this loop
@@ -290,16 +263,7 @@ void power_on_s5(void) {
 
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
-        DEBUG("%d DDR3V3 %d\n", (i+8), gpio_get(&DDR3VR_PWRGD));
     }
-
-    DEBUG(">i DDR3V3 %d\n", gpio_get(&DDR3VR_PWRGD));
-
-    GPIO_SET_DEBUG(POWER_TP_ON, true);
-    GPIO_SET_DEBUG(CCD_EN, true);
-    GPIO_SET_DEBUG(POWER_ETH_ON, true);
-    GPIO_SET_DEBUG(WLAN_PWR_EN, true);
-    GPIO_SET_DEBUG(LED_AIRPLANE, true);
 
     update_power_state();
 }
