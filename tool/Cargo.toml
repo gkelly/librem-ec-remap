@@ -1,18 +1,19 @@
 [package]
-name = "system76_ectool"
+name = "purism_ectool"
 version = "0.3.5"
 edition = "2018"
-description = "System76 EC tool"
+description = "Purism Librem EC tool"
 license = "MIT"
-authors = ["Jeremy Soller <jeremy@system76.com>"]
-repository = "https://github.com/system76/ec"
-documentation = "https://docs.rs/system76_ectool"
+authors = ["Jeremy Soller <jeremy@system76.com>",
+           "Nicole Faerber <nicole.faerber@puri.sm>",
+           "Matt DeVillier <matt.devillier@puri.sm>"]
+repository = "https://source.puri.sm/firmware/librem-ec"
 
 [lib]
 name = "ectool"
 
 [[bin]]
-name = "system76_ectool"
+name = "purism_ectool"
 required-features = ["std", "hidapi", "clap"]
 
 [dependencies]
