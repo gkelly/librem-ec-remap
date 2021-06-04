@@ -106,7 +106,7 @@ impl AccessLpcLinux {
     /// Locks ports and then returns access object
     pub unsafe fn new(timeout: Duration) -> Result<Self, Error> {
         // TODO: is there a better way to probe before running a command?
-        if ! Path::new("/sys/bus/acpi/devices/316D4C14:00").is_dir() {
+        if ! Path::new("/sys/bus/acpi/devices/PURI4543:00").is_dir() {
             return Err(Error::Io(io::Error::new(
                 io::ErrorKind::NotFound,
                 "Failed to find Librem EC ACPI device",
