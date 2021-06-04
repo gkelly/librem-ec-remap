@@ -26,8 +26,10 @@ bool bram_init(void) {
     for (i=0x80; i<(0xbf); i++)
         sum ^= BRAM[i];
     if (sum == BRAM[0xbf]) {
+        DEBUG("BRAM valid\n");
         return true;
     } else {
+        DEBUG("BRAM invalid, clearing\n");
         for (i=0x80; i<(0xbf); i++)
             BRAM[i] = 0x00;
         BRAM[0xbf] = 42;
@@ -101,7 +103,8 @@ void board_init(void) {
     battery_charger_disable();
     board_battery_init();
 
-    if (bram_init) {
+    if (bram_init()) {
+        DEBUG("BRAM OK, start %d end %d\n", BRAM[BRAM_CHARGE_START_THRES], BRAM[BRAM_CHARGE_END_THRES]);
         battery_set_start_threshold(BRAM[BRAM_CHARGE_START_THRES]);
         battery_set_end_threshold(BRAM[BRAM_CHARGE_END_THRES]);
     } else
