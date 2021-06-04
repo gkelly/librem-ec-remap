@@ -16,12 +16,12 @@
 // Represents a battery percentage level, below which charging will begin.
 // Valid values are [0, 100]
 // A value of 0 turns off the start threshold control.
-static uint8_t battery_start_threshold = BATTERY_START_THRESHOLD;
+static uint8_t battery_start_threshold = BATTERY_START_DEFAULT;
 
 // Represents a battery percentage level, above which charging will stop.
 // Valid values are [0, 100]
 // A value of 100 turns off the stop threshold control.
-static uint8_t battery_end_threshold = BATTERY_END_THRESHOLD;
+static uint8_t battery_end_threshold = BATTERY_END_DEFAULT;
 
 uint8_t battery_get_start_threshold(void) {
     if (battery_start_threshold > 100)
