@@ -131,6 +131,7 @@ void battery_event(void) {
 }
 
 void battery_reset(void) {
+    DEBUG("battery_reset()\n");
     battery_set_start_threshold(BATTERY_START_DEFAULT);
     battery_set_end_threshold(BATTERY_END_DEFAULT);
 }
