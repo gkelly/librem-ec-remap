@@ -142,8 +142,7 @@ void board_event(void) {
     }
 }
 
-// called once per second
-void board_1s_event(void) {
+static void check_jack_state(void) {
     static bool hp_det=false;
 
     if (power_state == POWER_STATE_S0) {
@@ -162,4 +161,9 @@ void board_1s_event(void) {
         // gpio_set(&MIC_SELECT, false);
         GPCRF0 = GPIO_OUT;
     }
+}
+
+// called once per second
+void board_1s_event(void) {
+    check_jack_state();
 }
