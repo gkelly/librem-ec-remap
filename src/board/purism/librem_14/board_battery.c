@@ -131,7 +131,6 @@ uint16_t adcval;
         if (res < 0) {
             DEBUG(" 0x0A r=%d\n", res);
         }
-        //DEBUG("SBS %dmA\n", adcval);
     } else {
         // we may have to wait for ADC to finish
         while (to++ < 100 && !(VCH1CTL & (1L << 7)))
@@ -152,10 +151,9 @@ uint16_t adcval;
             adcval = (adcval / (16)) * 10;	// no AC, discharge current
         else
             adcval = adcval / (4);		// on AC, charge current
-
-        //DEBUG("ADC %dmA\n", adcval);
     }
 
+    DEBUG("bat %dmA\n", adcval);
     battery_current = adcval;
 
     return battery_current;

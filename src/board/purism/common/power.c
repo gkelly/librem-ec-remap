@@ -404,7 +404,7 @@ void power_event(void) {
             DEBUG("plugged in\n");
             battery_charger_configure();
         }
-        battery_debug();
+        // battery_debug();
 
         // Reset main loop cycle to force reading PECI and battery
         main_cycle = 0;
