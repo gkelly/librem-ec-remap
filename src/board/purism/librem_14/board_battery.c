@@ -240,44 +240,52 @@ int16_t tval;
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x09, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x09 r=%d\n", res);
+    } else {
+        battery_voltage = tval;
     }
-    battery_voltage = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x08, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x08 r=%d\n", res);
+    } else {
+        battery_temp = (tval - 2731);
     }
-    battery_temp = (tval - 2731);
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x0A, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x0A r=%d\n", res);
+    } else {
+        battery_current = tval;
+        DEBUG("bat %dmA\n", battery_current);
     }
-    battery_current = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x0D, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x0D r=%d\n", res);
+    } else {
+        battery_charge = tval;
     }
-    battery_charge = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x0F, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x0F r=%d\n", res);
+    } else {
+        battery_remaining_capacity = tval;
     }
-    battery_remaining_capacity = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x10, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x10 r=%d\n", res);
+    } else {
+        battery_full_capacity = tval;
     }
-    battery_full_capacity = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x17, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x17 r=%d\n", res);
+    } else {
+        battery_cycle_count = tval;
     }
-    battery_cycle_count = tval;
 }
 
 static bool probe_gas_gauge(void)
