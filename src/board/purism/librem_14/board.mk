@@ -20,5 +20,19 @@ CFLAGS+=-DI2C_DEBUG_BUS=I2C_0
 
 CFLAGS+=-DHAVE_LID_SW
 
+# Custom fan curve
+CFLAGS+=-DBOARD_HEATUP=5
+CFLAGS+=-DBOARD_COOLDOWN=20
+CFLAGS+=-DBOARD_FAN_POINTS="\
+	FAN_POINT(50, 20), \
+	FAN_POINT(60, 25), \
+	FAN_POINT(65, 30), \
+	FAN_POINT(70, 40), \
+	FAN_POINT(75, 60), \
+	FAN_POINT(80, 75), \
+	FAN_POINT(85, 90), \
+	FAN_POINT(90, 100) \
+"
+
 # Add purism common code
 include src/board/purism/common/common.mk
