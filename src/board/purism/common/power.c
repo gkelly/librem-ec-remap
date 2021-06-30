@@ -515,6 +515,9 @@ void power_event(void) {
         GPIO_SET_DEBUG(POWER_ETH_ON, true);
         GPIO_SET_DEBUG(WLAN_PWR_EN, true);
         GPIO_SET_DEBUG(LED_AIRPLANE, true);
+
+        // Set PL4 as soon as possible after transitioning to S0
+        power_set_limit();
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
