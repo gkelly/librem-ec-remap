@@ -427,7 +427,6 @@ void board_battery_init(void)
     battery_status &= ~BATTERY_INITIALIZED;
 
     battery_charger_disable();
-    // charger_input_current = 1024; // about 1A @ 19V ~= 20W
     charger_input_current = 3420; // max current of 65W charger
 
     gpio_set(&CHG_CELL_CFG, false);
@@ -459,8 +458,9 @@ void board_battery_init(void)
                 // battery_full_capacity = 8800;
                 // battery_design_capacity = 8800;
                 // battery_design_voltage = 7600;
-                battery_charge_current = 1760;
                 // battery_charge_voltage = 8700;
+
+                battery_charge_current = 1760; // standard charge, max=4400
                 battery_min_voltage = 6000;
 
                 // charger_input_current = 0x1100;
@@ -469,7 +469,7 @@ void board_battery_init(void)
                 battery_status |= BATTERY_INITIALIZED;
 
                 sbs_battery = true;
-                battery_charger_enable();
+                battery_charger_enable(); // enable briefly to program the settings
                 battery_charger_disable();
             } else {
                 DEBUG("E: unknown bat, keeping charger off!\n");
