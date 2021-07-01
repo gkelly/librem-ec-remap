@@ -142,24 +142,31 @@ void board_event(void) {
     }
 }
 
-// called once per second
-void board_1s_event(void) {
+// check headphone jack plug state, set GPIO direction
+static void check_jack_state(void) {
     static bool hp_det=false;
 
     if (power_state == POWER_STATE_S0) {
-        if (hp_det != !gpio_get(&HEADPHONE_DET)) {
-            hp_det = !gpio_get(&HEADPHONE_DET);
-            DEBUG("HP %s\n", hp_det ? "in" : "out");
+        bool hp_det_curr = !gpio_get(&HEADPHONE_DET);
+        if (hp_det != hp_det_curr) {
+            hp_det = hp_det_curr;
             if (hp_det) {
+                DEBUG("Jack detect: plug inserted\n");
                 // there is a pull up so setting it as input will pull it high too
-                GPCRF0 = GPIO_IN;
+                *(MIC_SELECT.control) = GPIO_IN;
             } else {
+                DEBUG("Jack detect: plug removed\n");
                 // pin state is false by GPIO init, so just reenable output to pull it low
-                GPCRF0 = GPIO_OUT;
+                *(MIC_SELECT.control) = GPIO_OUT;
             }
         }
     } else {
-        // gpio_set(&MIC_SELECT, false);
-        GPCRF0 = GPIO_OUT;
+        // default to unplugged when not in S0
+        *(MIC_SELECT.control) = GPIO_OUT;
     }
+}
+
+// called once per second
+void board_1s_event(void) {
+    check_jack_state();
 }
