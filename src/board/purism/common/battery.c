@@ -123,7 +123,7 @@ bool battery_present = false;
 void battery_event(void) {
     if (battery_present) {
         board_battery_update_state(); // this will update all available runtime values
-        // DEBUG("BAT %d mV %d mA %d %%\n", battery_voltage, battery_current, battery_charge);
+        DEBUG("BAT %d mV %d mA %d %%\n", battery_voltage, battery_current, battery_charge);
     }
 
     battery_charger_configure();
