@@ -169,4 +169,5 @@ static void check_jack_state(void) {
 // called once per second
 void board_1s_event(void) {
     check_jack_state();
+    power_set_limit();
 }
