@@ -6,7 +6,12 @@ before_script:
   - DEBIAN_FRONTEND=noninteractive apt -yqq update
   - DEBIAN_FRONTEND=noninteractive apt -y install build-essential devscripts sdcc
 
+stages:
+  - build
+  - trigger
+
 build:
+  stage: build
   script:
         - echo "Setting up config.mk"
         - echo "BOARD?=purism/librem_14" > ./config.mk
@@ -21,3 +26,7 @@ build:
     name: "L14-EC-${CI_COMMIT_REF_NAME}-${CI_JOB_NAME}"
     paths:
       - "${CI_PROJECT_DIR}/Librem_14_EC/ec*.rom"
+
+trigger:
+  stage: trigger
+  trigger: Purism/librem14_ec_flash
