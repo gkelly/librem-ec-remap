@@ -1,0 +1,23 @@
+# build on PureOS byzantium
+image: pureos/byzantium:latest
+
+# Update packages
+before_script:
+  - DEBIAN_FRONTEND=noninteractive apt -yqq update
+  - DEBIAN_FRONTEND=noninteractive apt -y install build-essential devscripts sdcc
+
+build:
+  script:
+        - echo "Setting up config.mk"
+        - echo "BOARD?=purism/librem_14" > ./config.mk
+        - echo "Building..."
+        - make
+        - mkdir Librem_14_EC
+        - mv ./build/purism/librem_14/*/ec*.rom Librem_14_EC
+  tags:
+    - librem5
+  artifacts:
+    when: on_success
+    name: "L14-EC-${CI_COMMIT_REF_NAME}-${CI_JOB_NAME}"
+    paths:
+      - "${CI_PROJECT_DIR}/Librem_14_EC/ec*.rom"
