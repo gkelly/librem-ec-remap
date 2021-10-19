@@ -169,4 +169,13 @@ static void check_jack_state(void) {
 // called once per second
 void board_1s_event(void) {
     check_jack_state();
+
+    // if battery voltage drops below min voltage we prepare to shut down
+    // hard once external power is removed to prevent main battery from
+    // deep discharge
+    if (battery_status && BATTERY_INITIALIZED) {
+        if (battery_voltage < battery_min_voltage) {
+            gpio_set(&SMC_SHUTDOWN_N, false);
+        }
+    }
 }
