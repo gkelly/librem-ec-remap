@@ -394,7 +394,7 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        power_peci_limit(!ac_new);
+        power_set_limit();
 
         DEBUG("Power adapter ");
         if (ac_new) {
