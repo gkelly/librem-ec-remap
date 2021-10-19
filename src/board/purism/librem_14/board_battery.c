@@ -256,7 +256,6 @@ int16_t tval;
         DEBUG(" 0x0A r=%d\n", res);
     } else {
         battery_current = tval;
-        DEBUG("bat %dmA\n", battery_current);
     }
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x0D, &tval, 2);
@@ -293,105 +292,80 @@ static bool probe_gas_gauge(void)
 int res;
 int16_t tval;
 
+    DEBUG("bat probe - ");
+
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x00, &tval, 1);
     if (res < 0) {
         DEBUG("bat gauge r=%d\n", res);
         return false;
-    }
-
-    DEBUG("bat gauge:\n");
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x09, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x09 r=%d\n", res);
-    }
-    DEBUG(" %dmV\n", tval);
-    battery_voltage = tval;
-
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x08, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x08 r=%d\n", res);
-    }
-    DEBUG(" temp: %d\n", tval);
-    battery_temp = (tval - 2731);
-
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x0A, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x0A r=%d\n", res);
-    }
-    DEBUG(" %dmA\n", tval);
-    battery_current = tval;
-
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x0D, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x0D r=%d\n", res);
-    }
-    DEBUG(" %d%%\n", tval);
-    battery_charge = tval;
-
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x0F, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x0F r=%d\n", res);
-    }
-    DEBUG(" rem cap: %d\n", tval);
-    battery_remaining_capacity = tval;
-
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x10, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x10 r=%d\n", res);
-    }
-    DEBUG(" full cap: %d\n", tval);
-    battery_full_capacity = tval;
+    } else
+        DEBUG("is SBS\n");
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x14, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x14 r=%d\n", res);
-    }
-    DEBUG(" chg cur: %d\n", tval);
+    } else {
+        // DEBUG(" chg cur: %d\n", tval);
+        if (tval < 2000) {
+            res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x14, &tval, 2);
+        };
+        if (res >= 0) {
+            battery_charge_current = tval;
+        };
+    };
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x15, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x15 r=%d\n", res);
+    } else {
+        // DEBUG(" chg volt: %d\n", tval);
+        if (tval < 7000) {
+            res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x15, &tval, 2);
+        };
+        if (res >= 0) {
+            battery_charge_voltage = tval;
+        };
     }
-    DEBUG(" chg volt: %d\n", tval);
-    if (tval < 7000)
-        battery_charge_voltage = 8700;
-    else
-        battery_charge_voltage = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x16, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x16 r=%d\n", res);
+    } else {
+        DEBUG(" stat: 0x%04x\n", tval);
+        // battery_status = tval;
     }
-    DEBUG(" stat: 0x%04x\n", tval);
-    // battery_status = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x17, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x17 r=%d\n", res);
+    } else {
+        // DEBUG(" cycle#: %d\n", tval);
+        battery_cycle_count = tval;
     }
-    DEBUG(" cycle#: %d\n", tval);
-    battery_cycle_count = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x18, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x18 r=%d\n", res);
+    } else {
+        // DEBUG(" des-cap: %d\n", tval);
+        battery_design_capacity = tval;
     }
-    DEBUG(" des-cap: %d\n", tval);
-    battery_design_capacity = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x19, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x19 r=%d\n", res);
+    } else {
+        // DEBUG(" des-volt: %d\n", tval);
+        battery_design_voltage = tval;
     }
-    DEBUG(" des-volt: %d\n", tval);
-    battery_design_voltage = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x1b, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x1b r=%d\n", res);
+    } else {
+        // DEBUG(" man date: 0x%04x\n", tval);
+        battery_manufacturing_date = tval;
     }
-    DEBUG(" man date: 0x%04x\n", tval);
-    battery_manufacturing_date = tval;
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x1c, &tval, 2);
     if (res < 0) {
@@ -448,20 +422,39 @@ void board_battery_init(void)
             battery_charger_disable();
         } else {
             if (probe_gas_gauge()) {
-                DEBUG("I: 4-cell bat found\n");
+                DEBUG("I: SBS bat found\n");
+                update_gas_gauge();
                 // gpio_set(&CHG_CELL_CFG, true);
 
-                // battery_temp = 0;
-                // battery_current = 0;
-                // battery_charge = 0;
-                // battery_remaining_capacity = 0;
-                // battery_full_capacity = 8800;
-                // battery_design_capacity = 8800;
-                // battery_design_voltage = 7600;
-                // battery_charge_voltage = 8700;
+                DEBUG(" man date: 0x%04x\n", battery_manufacturing_date);
+                DEBUG(" cycle#: %d\n", battery_cycle_count);
+                DEBUG(" voltage : %d mV\n", battery_voltage);
+                DEBUG(" temp    : %d °C\n", battery_temp);
+                DEBUG(" current : %d mA\n", battery_current);
+                DEBUG(" charge  : %d%%\n", battery_charge);
+                DEBUG(" rem cap : %d mAh\n", battery_remaining_capacity);
+                DEBUG(" full cap: %d mAh\n", battery_full_capacity);
+                DEBUG(" chg volt: %d mV\n", battery_charge_voltage);
+                DEBUG(" chg cur : %d mA\n", battery_charge_current);
+                DEBUG(" des-volt: %d mV\n", battery_design_voltage);
+                DEBUG(" des-cap : %d mAh\n", battery_design_capacity);
 
-                battery_charge_current = 1760; // standard charge, max=4400
-                battery_min_voltage = 6000;
+                if (battery_charge_current != 0) {
+                    // the SBS reports the max charge current,
+                    // normal charge current is about 50% of that
+                    if (battery_charge_current > 1500)
+                        battery_charge_current /= 2;
+                } else {
+                    battery_charge_current = 1000; // safe standard charge for all bats
+                }
+                DEBUG(" chg curN: %d mA\n", battery_charge_current);
+                // min voltage is not reported by SBS
+                if (battery_design_voltage > 9000) {
+                    battery_min_voltage = 9000;
+                } else {
+                    battery_min_voltage = 6000;
+                }
+                DEBUG(" min volt: %d mV\n", battery_min_voltage);
 
                 // charger_input_current = 0x1100;
                 charger_min_system_voltage = 0x1600;
