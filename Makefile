@@ -13,8 +13,8 @@ all:
 else
 # Calculate version
 DATE=$(shell git show --format="%cd" --date="format:%Y-%m-%d" --no-patch)
-REV=$(shell git describe --always --dirty)
-VERSION?=$(DATE)_$(REV)
+REV=$(shell git describe --tags --always --dirty)
+VERSION?=$(REV)_$(DATE)
 
 # Set build directory
 BUILD=build/$(BOARD)/$(VERSION)
@@ -23,6 +23,7 @@ BUILD=build/$(BOARD)/$(VERSION)
 all: $(BUILD)/ec.rom
 	$(info Built '$(VERSION)' for '$(BOARD)')
 	makebin -s 1048576 < $(BUILD)/ec.ihx > $(BUILD)/ec-1M.rom
+	cp $(BUILD)/ec-1M.rom $(BUILD)/ec-$(VERSION).rom
 
 # Include common source
 COMMON_DIR=src/common
