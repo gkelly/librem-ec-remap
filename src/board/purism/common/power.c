@@ -272,6 +272,7 @@ void power_on_s5(void) {
 void power_off_s5(void) {
     DEBUG("%02X: power_off_s5\n", main_cycle);
 
+    GPIO_SET_DEBUG(EC_MUTE_N, false);
     GPIO_SET_DEBUG(POWER_TP_ON, false);		// no need for TP in S5
     GPIO_SET_DEBUG(CCD_EN, false);		// no need for camera in S5
     GPIO_SET_DEBUG(POWER_ETH_ON, false);	// power off ethernet
@@ -502,12 +503,14 @@ void power_event(void) {
         // Assert SYS_PWROK (GPIO E5); PCH will de-assert PLT_RST#
         GPIO_SET_DEBUG(PM_PWROK, true);
 
-        // Power on touchpad, camera, wifi/BT, ethernet, killswitch LEDs
+        // Power on touchpad, camera, wifi/BT, ethernet, killswitch LEDs,
+        // mute the audio class-D amp
         GPIO_SET_DEBUG(POWER_TP_ON, true);
         GPIO_SET_DEBUG(CCD_EN, true);
         GPIO_SET_DEBUG(POWER_ETH_ON, true);
         GPIO_SET_DEBUG(WLAN_PWR_EN, true);
         GPIO_SET_DEBUG(LED_AIRPLANE, true);
+        GPIO_SET_DEBUG(EC_MUTE_N, true);
 
         // Set PL4 as soon as possible after transitioning to S0
         power_set_limit();
@@ -527,7 +530,9 @@ void power_event(void) {
         // Clear GPIO F2
         GPIO_SET_DEBUG(ROP_VCCST_PWRGD, false);
 
-        // Power down touchpad, camera, wifi/BT, ethernet, killswitch LEDs
+        // Power down touchpad, camera, wifi/BT, ethernet, killswitch LEDs,
+        // unmute the audio class-D amp
+        GPIO_SET_DEBUG(EC_MUTE_N, false);
         GPIO_SET_DEBUG(POWER_TP_ON, false);
         GPIO_SET_DEBUG(CCD_EN, false);
         GPIO_SET_DEBUG(POWER_ETH_ON, false);
