@@ -349,15 +349,8 @@ static void power_peci_limit(bool ac) {
 
 // Set the power draw limit depending on if on AC or DC power
 void power_set_limit(void) {
-    static bool last_power_limit_ac = true;
-    if (power_state == POWER_STATE_S0 || power_state == POWER_STATE_S3) {
-        bool ac = !gpio_get(&ACIN_N);
-        if (last_power_limit_ac != ac) {
-            power_peci_limit(ac);
-            last_power_limit_ac = ac;
-        }
-    } else {
-        last_power_limit_ac = false;
+    if (power_state == POWER_STATE_S0) {
+        power_peci_limit(!gpio_get(&ACIN_N));
     }
 }
 
