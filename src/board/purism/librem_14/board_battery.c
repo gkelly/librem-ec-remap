@@ -398,6 +398,7 @@ void board_battery_init(void)
     battery_full_capacity = 0;
     battery_design_capacity = 0;
     battery_design_voltage = 0;
+    battery_min_voltage = 0;
     battery_status &= ~BATTERY_INITIALIZED;
 
     battery_charger_disable();
@@ -408,14 +409,12 @@ void board_battery_init(void)
     battery_present = !gpio_get(&BAT_DETECT_N);
 
     if (battery_present) {
-        battery_voltage = board_battery_get_voltage();
         if (read_eeprom()) {
-            DEBUG("I: 3-cell bat found\n");
+            DEBUG("I: old 3-cell bat found\n");
             // gpio_set(&CHG_CELL_CFG, false);
             battery_status |= BATTERY_INITIALIZED;
             sbs_battery = false;
 
-            // charger_input_current = 0x1100;
             charger_min_system_voltage = 0x1E00;
 
             battery_charger_enable();
@@ -451,13 +450,12 @@ void board_battery_init(void)
                 // min voltage is not reported by SBS
                 if (battery_design_voltage > 9000) {
                     battery_min_voltage = 9000;
+                    charger_min_system_voltage = 0x1E00;
                 } else {
                     battery_min_voltage = 6000;
+                    charger_min_system_voltage = 0x1600;
                 }
                 DEBUG(" min volt: %d mV\n", battery_min_voltage);
-
-                // charger_input_current = 0x1100;
-                charger_min_system_voltage = 0x1600;
 
                 battery_status |= BATTERY_INITIALIZED;
 
