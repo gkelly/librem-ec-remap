@@ -237,6 +237,37 @@ static void update_gas_gauge(void)
 int res;
 int16_t tval;
 
+    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x16, &tval, 2);
+    if (res < 0) {
+        DEBUG(" 0x16 r=%d\n", res);
+    } else {
+        battery_status = tval;
+    }
+
+    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x14, &tval, 2);
+    if (res < 0) {
+        DEBUG(" 0x14 r=%d\n", res);
+    } else {
+        battery_charge_current = tval;
+    };
+
+    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x15, &tval, 2);
+    if (res < 0) {
+        DEBUG(" 0x15 r=%d\n", res);
+    } else {
+        battery_charge_voltage = tval;
+    }
+
+    if (battery_charge_current != 0) {
+        // the SBS reports the max charge current,
+        // normal charge current is about 50% of that
+        if (battery_charge_current > 1500) {
+            battery_charge_current /= 2;
+        } else {
+            battery_charge_current = 1000; // safe standard charge for all bats
+        }
+    }
+
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x09, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x09 r=%d\n", res);
@@ -301,38 +332,12 @@ int16_t tval;
     } else
         DEBUG("is SBS\n");
 
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x14, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x14 r=%d\n", res);
-    } else {
-        // DEBUG(" chg cur: %d\n", tval);
-        if (tval < 2000) {
-            res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x14, &tval, 2);
-        };
-        if (res >= 0) {
-            battery_charge_current = tval;
-        };
-    };
-
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x15, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x15 r=%d\n", res);
-    } else {
-        // DEBUG(" chg volt: %d\n", tval);
-        if (tval < 7000) {
-            res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x15, &tval, 2);
-        };
-        if (res >= 0) {
-            battery_charge_voltage = tval;
-        };
-    }
-
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x16, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x16 r=%d\n", res);
     } else {
         DEBUG(" stat: 0x%04x\n", tval);
-        // battery_status = tval;
+        battery_status = tval;
     }
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x17, &tval, 2);
@@ -423,7 +428,6 @@ void board_battery_init(void)
             if (probe_gas_gauge()) {
                 DEBUG("I: SBS bat found\n");
                 update_gas_gauge();
-                // gpio_set(&CHG_CELL_CFG, true);
 
                 DEBUG(" man date: 0x%04x\n", battery_manufacturing_date);
                 DEBUG(" cycle#: %d\n", battery_cycle_count);
@@ -438,26 +442,17 @@ void board_battery_init(void)
                 DEBUG(" des-volt: %d mV\n", battery_design_voltage);
                 DEBUG(" des-cap : %d mAh\n", battery_design_capacity);
 
-                if (battery_charge_current != 0) {
-                    // the SBS reports the max charge current,
-                    // normal charge current is about 50% of that
-                    if (battery_charge_current > 1500)
-                        battery_charge_current /= 2;
-                } else {
-                    battery_charge_current = 1000; // safe standard charge for all bats
-                }
-                DEBUG(" chg curN: %d mA\n", battery_charge_current);
                 // min voltage is not reported by SBS
                 if (battery_design_voltage > 9000) {
+                    // 3-cell, 3S
                     battery_min_voltage = 9000;
                     charger_min_system_voltage = 0x1E00;
                 } else {
+                    // 4-cell, 2S2P
                     battery_min_voltage = 6000;
                     charger_min_system_voltage = 0x1600;
                 }
                 DEBUG(" min volt: %d mV\n", battery_min_voltage);
-
-                battery_status |= BATTERY_INITIALIZED;
 
                 sbs_battery = true;
                 battery_charger_enable(); // enable briefly to program the settings
@@ -465,7 +460,6 @@ void board_battery_init(void)
             } else {
                 DEBUG("E: unknown bat, keeping charger off!\n");
                 battery_status &= ~BATTERY_INITIALIZED;
-                // gpio_set(&CHG_CELL_CFG, true);
                 sbs_battery = false;
             }
         }

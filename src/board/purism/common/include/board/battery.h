@@ -14,7 +14,18 @@
     #define CHARGER_ADDRESS 0x09
 #endif
 
-#define BATTERY_INITIALIZED (1U << 7)
+/* SBS status register */
+#define BATTERY_FULLY_DISCHARGED   (1U << 4)
+#define BATTERY_FULLY_CHARGED      (1U << 5)
+#define BATTERY_DISCHARGING        (1U << 6)
+#define BATTERY_INITIALIZED        (1U << 7)
+
+#define BATTERY_OVER_CHARGED_ALARM        (1U << 15)
+#define BATTERY_TERMINATE_CHARGE_ALARM    (1U << 14)
+#define BATTERY_OVER_TEMP_ALARM           (1U << 12)
+#define BATTERY_TERMINATE_DISCHARGE_ALARM (1U << 11)
+#define BATTERY_REMAINING_CAPACITY_ALARM  (1U << 9)
+#define BATTERY_REMAINING_TIME_ALARM      (1U << 8)
 
 extern uint16_t battery_temp;
 extern uint16_t battery_voltage;
@@ -42,7 +53,6 @@ bool battery_set_start_threshold(uint8_t value);
 uint8_t battery_get_end_threshold(void);
 bool battery_set_end_threshold(uint8_t value);
 
-int battery_charger_configure(void);
 void battery_event(void);
 void battery_reset(void);
 
