@@ -61,21 +61,21 @@ void peci_init(void) {
     GCR2 |= (1 << 4);
 
     // Set frequency to 1MHz
-    HOCTL2R = 0x01;
-    // Set VTT to 1V
-    PADCTLR = 0x02;
+    HOCTL2R = HOPTTRS_1MHZ;
+    // Set VTT to 1.1V
+    PADCTLR = HOVTTS_1_10V;
 }
 
 // Returns positive completion code on success, negative completion code or
 // negative (0x1000 | status register) on PECI hardware error
 int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Wait for completion
-    while (HOSTAR & 1) {}
+    while (HOSTAR & HOBY) {}
     // Clear status
     HOSTAR = HOSTAR;
 
     // Enable PECI, clearing data fifo's, enable AW_FCS
-    HOCTLR = (1 << 5) | (1 << 3) | (1 << 1);
+    HOCTLR = FIFOCLR | PECIHEN | AWFCS_EN;
     // Set address to default
     HOTRADDR = 0x30;
     // Set write length
@@ -99,13 +99,13 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     HOWRDR = (uint8_t)(data >> 24);
 
     // Start transaction
-    HOCTLR |= 1;
+    HOCTLR |= START;
 
     // Wait for completion
-    while (HOSTAR & 1) {}
+    while (HOSTAR & HOBY) {}
 
     int status = (int)HOSTAR;
-    if (status & (1 << 1)) {
+    if (status & FINISH) {
         int cc = (int)HORDDR;
         if (cc & 0x80) {
             return -cc;
@@ -130,12 +130,12 @@ void peci_event(void) {
 #endif // EC_ESPI
     {
         // Wait for completion
-        while (HOSTAR & 1) {}
+        while (HOSTAR & HOBY) {}
         // Clear status
         HOSTAR = HOSTAR;
 
-        // Enable PECI, clearing data fifo's
-        HOCTLR = (1 << 5) | (1 << 3);
+        // Enable PECI, clearing data fifo's, enable AW_FCS
+        HOCTLR = FIFOCLR | PECIHEN | AWFCS_EN;
         // Set address to default
         HOTRADDR = 0x30;
         // Set write length
@@ -145,12 +145,12 @@ void peci_event(void) {
         // Set command
         HOCMDR = 1;
         // Start transaction
-        HOCTLR |= 1;
+        HOCTLR |= START;
 
         // Wait for completion
-        while (HOSTAR & 1) {}
+        while (HOSTAR & HOBY) {}
 
-        if (HOSTAR & (1 << 1)) {
+        if (HOSTAR & FINISH) {
             // Use result if finished successfully
             uint8_t low = HORDDR;
             uint8_t high = HORDDR;
