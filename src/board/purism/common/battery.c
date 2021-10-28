@@ -56,16 +56,19 @@ bool battery_set_end_threshold(uint8_t value) {
 /**
  * Configure the charger based on charging threshold values.
  */
-int battery_charger_configure(void) {
+static int battery_charger_configure(void) {
     static bool should_charge = false;
     bool charger_present = !gpio_get(&ACIN_N);
 
-    if (battery_charge >= battery_get_end_threshold()) {
-        // Stop threshold configured: Stop charging at threshold.
+    // Stop threshold configured: Stop charging at threshold or
+    // if battery reports it is still full
+    if ((battery_charge >= battery_get_end_threshold()) ||
+        (battery_status & BATTERY_FULLY_CHARGED) ||
+        (battery_status & BATTERY_TERMINATE_CHARGE_ALARM)) {
         should_charge = false;
-    }
-    else if (battery_charge <= battery_get_start_threshold()) {
-        // Start threshold configured: Start charging at threshold.
+    } // Start threshold configured and battery not full: Start charging at threshold
+    else if ((battery_charge <= battery_get_start_threshold()) &&
+            !(battery_status & BATTERY_FULLY_CHARGED)) {
         should_charge = true;
     }
 
@@ -123,10 +126,18 @@ bool battery_present = false;
 void battery_event(void) {
     if (battery_present) {
         board_battery_update_state(); // this will update all available runtime values
-        DEBUG("BAT %d mV %d mA %d %%\n", battery_voltage, battery_current, battery_charge);
+        DEBUG("BAT %04x %dmV %dmA %d%%\n", battery_status, battery_voltage, battery_current, battery_charge);
     }
-
-    battery_charger_configure();
+    if (battery_status & 0x9000) {
+        // battery reports an error or problem
+        // disable charger by all means and
+        // blink warning LED
+        battery_charger_disable();
+        gpio_set(&LED_BAT_WARN, !gpio_get(&LED_BAT_WARN));
+        gpio_set(&LED_PWR, true);
+    } else {
+        battery_charger_configure();
+    }
     battery_charger_event();
 }
 

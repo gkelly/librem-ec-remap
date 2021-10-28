@@ -174,7 +174,8 @@ void board_1s_event(void) {
     // hard once external power is removed to prevent main battery from
     // deep discharge
     if (battery_status && BATTERY_INITIALIZED) {
-        if (battery_voltage < battery_min_voltage) {
+        if ((battery_voltage < battery_min_voltage) ||
+            (battery_status & BATTERY_TERMINATE_DISCHARGE_ALARM)) {
             gpio_set(&SMC_SHUTDOWN_N, false);
         }
     }

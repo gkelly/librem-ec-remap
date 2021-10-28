@@ -393,12 +393,9 @@ void power_event(void) {
         DEBUG("Power adapter ");
         if (ac_new) {
             DEBUG("unplugged\n");
-            battery_charger_disable();
         } else {
             DEBUG("plugged in\n");
-            battery_charger_configure();
         }
-        // battery_debug();
 
         // Reset main loop cycle to force reading PECI and battery
         main_cycle = 0;
@@ -417,11 +414,6 @@ void power_event(void) {
     ac_last = ac_new;
 
     gpio_set(&AC_PRESENT, !ac_new);
-
-    // Configure charger based on charging thresholds when plugged in
-    if (!ac_new) {
-        battery_charger_configure();
-    }
 
     // Read power switch state
     static bool ps_last = true;
@@ -643,23 +635,11 @@ void power_event(void) {
         }
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
-#if 0
-        if (
-            (time < last_time) // overflow
-            ||
-            (time >= (last_time + 1000)) // timeout
-        ) {
-            gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
-            last_time = time;
-        }
-        //gpio_set(&LED_ACIN, false);
-#else
         DCR5 += dimdir ? 1 : -1;
         if (DCR5 == 0xff)
             dimdir = false;
         if (DCR5 == 0x00)
             dimdir = true;
-#endif
     } else if (!ac_new) {
         // AC plugged in, but in < S3, white LED off
         gpio_set(&LED_PWR, true);
