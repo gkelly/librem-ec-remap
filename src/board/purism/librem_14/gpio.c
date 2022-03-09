@@ -44,6 +44,7 @@ struct Gpio __code POWER_TP_ON =		GPIO(C, 0);	// power supply for touchpad
 struct Gpio __code POWER_ETH_ON =		GPIO(C, 6);	// power supply for Gbit ethernet controller
 struct Gpio __code KBD_BACKLIGHT_EN =	GPIO(A, 6);
 struct Gpio __code CHG_CELL_CFG =		GPIO(J, 1);
+struct Gpio __code BAT_CELL_SEL =		GPIO(J, 3);
 struct Gpio __code HEADPHONE_DET =		GPIO(I, 6);
 struct Gpio __code MIC_SELECT =			GPIO(F, 0);
 struct Gpio __code EC_MUTE_N =			GPIO(E, 3);
@@ -155,12 +156,12 @@ void gpio_init() {
     GPCRI7 = GPIO_OUT;		// type-C USB port 5V power enable
     
     // GPIO port J
-    GPDRJ = (1 << 4) | (1 << 5); // LEDs have negative logic, turn off, default 2S CELL
+    GPDRJ = (1 << 3) | (1 << 4) | (1 << 5); // LEDs have negative logic, turn off
 
     GPCRJ0 = GPIO_OUT;		// PROCHOT#_EC, device overheat
     GPCRJ1 = GPIO_OUT;		// DIS_BAT, CELL config for charge controller
     GPCRJ2 = GPIO_OUT;		// camera power on
-    GPCRJ3 = GPIO_IN;		// NA
+    GPCRJ3 = GPIO_OUT;		// BAT_CELL_SEL
     GPCRJ4 = GPIO_OUT;		// power/charging LED green enable/disable
     GPCRJ5 = GPIO_OUT;		// power/charging LED orange enable/disable
 

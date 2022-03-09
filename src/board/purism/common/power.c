@@ -377,6 +377,9 @@ static bool power_button_disabled(void) {
 #endif
 }
 
+// XXX
+void board_battery_print_batinfo(void);
+
 void power_event(void) {
     // Always switch to ds5 if EC is running
     if (power_state == POWER_STATE_DEFAULT) {
@@ -396,6 +399,7 @@ void power_event(void) {
         } else {
             DEBUG("plugged in\n");
         }
+        board_battery_print_batinfo();
 
         // Reset main loop cycle to force reading PECI and battery
         main_cycle = 0;

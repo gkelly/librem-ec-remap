@@ -4,11 +4,14 @@
 #include <arch/delay.h>
 #include <board/battery.h>
 #include <board/board.h>
+#include <board/smbus.h>
 #include <board/gpio.h>
 //#include <common/i2c.h>
 #include <ec/adc.h>
 #include <ec/i2c.h>
 #include <common/debug.h>
+
+#include <charger/bq24715.h>
 
 #define BAT_GAS_GAUGE_ADDR (0x16 >> 1)
 #define BAT_EEPROM_ADR (0xa0 >> 1)
@@ -392,9 +395,27 @@ void board_battery_update_state(void)
     }
 }
 
+void board_battery_print_batinfo(void)
+{
+   DEBUG(" man date: 0x%04x\n", battery_manufacturing_date);
+   DEBUG(" cycle#: %d\n", battery_cycle_count);
+   DEBUG(" voltage : %d mV\n", battery_voltage);
+   DEBUG(" temp    : %d °C\n", battery_temp);
+   DEBUG(" current : %d mA\n", battery_current);
+   DEBUG(" charge  : %d%%\n", battery_charge);
+   DEBUG(" rem cap : %d mAh\n", battery_remaining_capacity);
+   DEBUG(" full cap: %d mAh\n", battery_full_capacity);
+   DEBUG(" chg volt: %d mV\n", battery_charge_voltage);
+   DEBUG(" chg cur : %d mA\n", battery_charge_current);
+   DEBUG(" des-volt: %d mV\n", battery_design_voltage);
+   DEBUG(" des-cap : %d mAh\n", battery_design_capacity);
+}
+
 // try to figure out which battery we have
 void board_battery_init(void)
 {
+    int res=0;
+
     battery_voltage = 0;
     battery_temp = 0;
     battery_current = 0;
@@ -406,10 +427,37 @@ void board_battery_init(void)
     battery_min_voltage = 0;
     battery_status &= ~BATTERY_INITIALIZED;
 
-    battery_charger_disable();
-    charger_input_current = 3420; // max current of 65W charger
+    //battery_charger_disable();
 
     gpio_set(&CHG_CELL_CFG, false);
+    delay_us(100);
+
+    // after POR charge is enabled, disable it
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        0x12,
+        // SBC_CHARGE_INHIBIT | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
+        // SBC_CHARGE_INHIBIT | SBC_IDPM_EN | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
+        0xe145
+    );
+    delay_us(100);
+
+    // disconnect battery by enabling LEARN mode
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        0x12,
+        // SBC_CHARGE_INHIBIT | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
+        // SBC_CHARGE_INHIBIT | SBC_IDPM_EN | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
+        0xe165
+    );
+    delay_us(100);
+
+    charger_input_current = 3420; // max current of 65W charger
+
+    // pull CELL low
+//    gpio_set(&BAT_CELL_SEL, false);
+//    gpio_set(&CHG_CELL_CFG, true);
+//    delay_us(100);
 
     battery_present = !gpio_get(&BAT_DETECT_N);
 
@@ -429,31 +477,33 @@ void board_battery_init(void)
                 DEBUG("I: SBS bat found\n");
                 update_gas_gauge();
 
-                DEBUG(" man date: 0x%04x\n", battery_manufacturing_date);
-                DEBUG(" cycle#: %d\n", battery_cycle_count);
-                DEBUG(" voltage : %d mV\n", battery_voltage);
-                DEBUG(" temp    : %d °C\n", battery_temp);
-                DEBUG(" current : %d mA\n", battery_current);
-                DEBUG(" charge  : %d%%\n", battery_charge);
-                DEBUG(" rem cap : %d mAh\n", battery_remaining_capacity);
-                DEBUG(" full cap: %d mAh\n", battery_full_capacity);
-                DEBUG(" chg volt: %d mV\n", battery_charge_voltage);
-                DEBUG(" chg cur : %d mA\n", battery_charge_current);
-                DEBUG(" des-volt: %d mV\n", battery_design_voltage);
-                DEBUG(" des-cap : %d mAh\n", battery_design_capacity);
+                board_battery_print_batinfo();
 
                 // min voltage is not reported by SBS
                 if (battery_design_voltage > 9000) {
                     // 3-cell, 3S
                     battery_min_voltage = 9000;
                     charger_min_system_voltage = 0x1E00;
+
+                    // this will pull CELL high -> 3S config
+                    gpio_set(&BAT_CELL_SEL, true);
+                    gpio_set(&CHG_CELL_CFG, true);
+                    delay_us(100);
+                    gpio_set(&CHG_CELL_CFG, false);
                 } else {
                     // 4-cell, 2S2P
                     battery_min_voltage = 6000;
                     charger_min_system_voltage = 0x1600;
+
+                    // this will float CELL -> 2S config
+                    gpio_set(&BAT_CELL_SEL, false);
+                    gpio_set(&CHG_CELL_CFG, true);
+                    delay_us(100);
+                    gpio_set(&CHG_CELL_CFG, false);
                 }
                 DEBUG(" min volt: %d mV\n", battery_min_voltage);
 
+                battery_status |= BATTERY_INITIALIZED;
                 sbs_battery = true;
                 battery_charger_enable(); // enable briefly to program the settings
                 battery_charger_disable();
