@@ -391,8 +391,6 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        power_set_limit();
-
         DEBUG("Power adapter ");
         if (ac_new) {
             DEBUG("unplugged\n");
@@ -406,6 +404,8 @@ void power_event(void) {
 
         // Send SCI to update AC and battery information
         ac_send_sci = true;
+
+        power_set_limit();
     }
     if (ac_send_sci) {
         // Send SCI 0x16 for AC detect event if ACPI OS is loaded
@@ -509,6 +509,7 @@ void power_event(void) {
         GPIO_SET_DEBUG(EC_MUTE_N, true);
 
         // Set PL4 as soon as possible after transitioning to S0
+        delay_ms(100);
         power_set_limit();
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
