@@ -11,6 +11,7 @@
 
 // Default values to disable battery charging thresholds
 #define BATTERY_START_DEFAULT   90
+#define BATTERY_START_MIN	20
 #define BATTERY_END_DEFAULT     100
 
 // Represents a battery percentage level, below which charging will begin.
@@ -26,11 +27,14 @@ static uint8_t battery_end_threshold = BATTERY_END_DEFAULT;
 uint8_t battery_get_start_threshold(void) {
     if (battery_start_threshold > 100)
         return BATTERY_START_DEFAULT;
+    if (battery_start_threshold < BATTERY_START_MIN)
+        return BATTERY_START_MIN;
+
     return battery_start_threshold;
 }
 
 bool battery_set_start_threshold(uint8_t value) {
-    if (value > 100 || value >= battery_end_threshold)
+    if (value < BATTERY_START_MIN || value > 100 || value >= battery_end_threshold)
         return false;
 
     battery_start_threshold = value;
