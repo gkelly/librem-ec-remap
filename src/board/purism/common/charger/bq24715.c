@@ -42,7 +42,7 @@ int battery_charger_disable(void) {
         CHARGER_ADDRESS,
         0x12,
         // SBC_CHARGE_INHIBIT | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
-        SBC_CHARGE_INHIBIT | SBC_IDPM_EN | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
+        SBC_CHARGE_INHIBIT | SBC_IDPM_EN | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_1MHZ | SBC_WDTMR_ADJ_175S | SBC_AUDIO_FREQ_LIM
     );
     DEBUG("CHG disabled\n");
     charger_enabled = false;
@@ -88,12 +88,11 @@ int battery_charger_enable(void) {
     res = smbus_write(
         CHARGER_ADDRESS,
         0x12,
-        SBC_PWM_FREQ_800KHZ |
+        SBC_PWM_FREQ_1MHZ |
         SBC_IDPM_EN |
         SBC_FIX_IOUT |
         SBC_AUDIO_FREQ_LIM |
-        SBC_LSFET_OCP_THR |
-        SBC_SYSOVP
+        SBC_LSFET_OCP_THR
     );
 
     DEBUG("CHG enabled\n");
