@@ -330,9 +330,6 @@ void power_off_s5(void) {
 }
 
 static void power_peci_limit(bool ac) {
-#ifdef POWER_LIMIT_AC
-#ifdef POWER_LIMIT_DC
-    #error bla
     uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
     // Retry, timeout errors happen occasionally
     for (int i = 0; i < 16; i++) {
@@ -349,10 +346,6 @@ static void power_peci_limit(bool ac) {
             ERROR("power_peci_limit unknown response: 0x%02X\n", res);
         }
     }
-#endif
-#else
-    (void) ac;
-#endif
 }
 
 // Set the power draw limit depending on if on AC or DC power
