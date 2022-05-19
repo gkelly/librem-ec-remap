@@ -335,22 +335,6 @@ int16_t tval;
     } else
         DEBUG("is SBS\n");
 
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x16, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x16 r=%d\n", res);
-    } else {
-        DEBUG(" stat: 0x%04x\n", tval);
-        battery_status = tval;
-    }
-
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x17, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x17 r=%d\n", res);
-    } else {
-        // DEBUG(" cycle#: %d\n", tval);
-        battery_cycle_count = tval;
-    }
-
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x18, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x18 r=%d\n", res);
@@ -378,8 +362,9 @@ int16_t tval;
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x1c, &tval, 2);
     if (res < 0) {
         DEBUG(" 0x1c r=%d\n", res);
+    } else {
+        DEBUG(" serial#: %d\n", tval);
     }
-    DEBUG(" serial#: %d\n", tval);
 
     return true;
 }
@@ -427,30 +412,7 @@ void board_battery_init(void)
     battery_min_voltage = 0;
     battery_status &= ~BATTERY_INITIALIZED;
 
-    //battery_charger_disable();
-
-    gpio_set(&CHG_CELL_CFG, false);
-    delay_us(100);
-
-    // after POR charge is enabled, disable it
-    res = smbus_write(
-        CHARGER_ADDRESS,
-        0x12,
-        // SBC_CHARGE_INHIBIT | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
-        // SBC_CHARGE_INHIBIT | SBC_IDPM_EN | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
-        0xe145
-    );
-    delay_us(100);
-
-    // disconnect battery by enabling LEARN mode
-    res = smbus_write(
-        CHARGER_ADDRESS,
-        0x12,
-        // SBC_CHARGE_INHIBIT | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
-        // SBC_CHARGE_INHIBIT | SBC_IDPM_EN | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
-        0xe165
-    );
-    delay_us(100);
+    battery_charger_disable();
 
     charger_input_current = 3420; // max current of 65W charger
 
