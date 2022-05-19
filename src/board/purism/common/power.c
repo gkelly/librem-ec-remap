@@ -351,6 +351,8 @@ static void power_peci_limit(bool ac) {
 // Set the power draw limit depending on if on AC or DC power
 void power_set_limit(void) {
     if (power_state == POWER_STATE_S0) {
+        // if we are just coming out of S3 we need to wait a bit
+        delay_ms(1);
         power_peci_limit(!gpio_get(&ACIN_N));
     }
 }
