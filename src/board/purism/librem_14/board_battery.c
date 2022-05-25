@@ -414,7 +414,11 @@ void board_battery_init(void)
 
     battery_charger_disable();
 
-    charger_input_current = 3420; // max current of 65W charger
+    // charger voltage
+    // 19V for barrel connector,
+    // 20V for type-C PD
+    // charger_input_current = 3420; // max current of 65W charger
+    charger_input_current = 4700; // max current of 90W charger
 
     // pull CELL low
 //    gpio_set(&BAT_CELL_SEL, false);
