@@ -235,6 +235,57 @@ uint16_t max_discharge_current;
     return true;
 }
 
+
+//
+// read from I2C addr BAT_GAS_GAUGE_ADDR len bytes (max 2),
+// if an error occurs or if the result value is less than 'min' or more than 'max'
+// then retry up to 'tries' times,
+// return the result or the return value of the last I2C read try (in case of error will be negative)
+//
+// ...apparently sometimes we get false values which can be a problem for charging
+//
+static int16_t i2c_get_safe(uint8_t index, uint8_t len, uint16_t min, uint16_t max, uint8_t tries)
+{
+int res;
+int16_t tval;
+
+    tval = -1;
+    res=-1;
+
+    while (tries--) {
+        res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, index, &tval, len);
+        if ((res >= 0) && (tval >= min) && (tval <= max)) {
+            return tval;
+        }
+        delay_us(100);
+    }
+
+    if (res >= 0)
+        return tval;
+    else
+        return res;
+}
+
+
+// 3 cell:
+// max. voltage: 13.2V
+// nominal volt: 11.55V
+// discharge min. volt: 9V
+// nominal charge: 6200mAh
+// standard charge: 0.2C (1240mA)
+// standard discharge: 0.5C (3100mA)
+// max. discharge: 1.0C (6200mA)
+//
+// 4 cell:
+// typical volt: 7.6V
+// max volt: 8.75V
+// typical capaciyt: 8800mAh
+// charge volt: 8.7V
+// standard charge: 0.2C (1760mA)
+// max charge: 0.5C (4400mA)
+// standard discharge: 0.2C (1760mA)
+// end discharge: 6.0V
+
 static void update_gas_gauge(void)
 {
 int res;
@@ -247,21 +298,14 @@ int16_t tval;
         battery_status = tval;
     }
 
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x14, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x14 r=%d\n", res);
+    tval = i2c_get_safe(0x16, 2, 1000, 5000, 3);
+    if (tval < 0) {
+        DEBUG(" 0x14 r=%d\n", tval);
     } else {
         battery_charge_current = tval;
     };
 
-    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x15, &tval, 2);
-    if (res < 0) {
-        DEBUG(" 0x15 r=%d\n", res);
-    } else {
-        battery_charge_voltage = tval;
-    }
-
-    if (battery_charge_current != 0) {
+    if (battery_charge_current > 0) {
         // the SBS reports the max charge current,
         // normal charge current is about 50% of that
         if (battery_charge_current > 1500) {
@@ -269,6 +313,13 @@ int16_t tval;
         } else {
             battery_charge_current = 1000; // safe standard charge for all bats
         }
+    }
+
+    res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x15, &tval, 2);
+    if (res < 0) {
+        DEBUG(" 0x15 r=%d\n", res);
+    } else {
+        battery_charge_voltage = tval;
     }
 
     res = i2c_get(&I2C_0, BAT_GAS_GAUGE_ADDR, 0x09, &tval, 2);
@@ -419,11 +470,6 @@ void board_battery_init(void)
     // 20V for type-C PD
     // charger_input_current = 3420; // max current of 65W charger
     charger_input_current = 4700; // max current of 90W charger
-
-    // pull CELL low
-//    gpio_set(&BAT_CELL_SEL, false);
-//    gpio_set(&CHG_CELL_CFG, true);
-//    delay_us(100);
 
     battery_present = !gpio_get(&BAT_DETECT_N);
 
