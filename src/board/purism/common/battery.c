@@ -67,8 +67,7 @@ static int battery_charger_configure(void) {
     // Stop threshold configured: Stop charging at threshold or
     // if battery reports it is still full
     if ((battery_charge >= battery_get_end_threshold()) ||
-        (battery_status & BATTERY_FULLY_CHARGED) ||
-        (battery_status & BATTERY_TERMINATE_CHARGE_ALARM)) {
+        (battery_status & BATTERY_FULLY_CHARGED)) {
         should_charge = false;
     } // Start threshold configured and battery not full: Start charging at threshold
     else if ((battery_charge <= battery_get_start_threshold()) &&
@@ -94,7 +93,7 @@ static int battery_charger_configure(void) {
         if (power_state == POWER_STATE_DS3 ||
             power_state == POWER_STATE_S3 ||
             power_state == POWER_STATE_S0) {
-            if (battery_charge < 20) {
+            if ((battery_charge < 20) || (battery_status & BATTERY_TERMINATE_CHARGE_ALARM)) {
                 gpio_set(&LED_BAT_WARN, false);
                 gpio_set(&LED_PWR, true);
             } else {
