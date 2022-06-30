@@ -21,23 +21,6 @@ int battery_charger_disable(void) {
 
     DEBUG("CHG disable\n");
 
-#if 0
-    // Disable charge voltage
-    res = smbus_write(CHARGER_ADDRESS, 0x15, 0);
-    if (res < 0)
-        return res;
-
-    // Disable input current
-    res = smbus_write(CHARGER_ADDRESS, 0x3F, 0);
-    if (res < 0)
-        return res;
-
-    // Disable charge current
-    res = smbus_write(CHARGER_ADDRESS, 0x14, 0);
-    if (res < 0)
-        return res;
-#endif
-
     // Set charge option 0 with 175s watchdog
     res = smbus_write(
         CHARGER_ADDRESS,

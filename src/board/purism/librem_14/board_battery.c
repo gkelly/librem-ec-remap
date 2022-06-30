@@ -501,22 +501,10 @@ void board_battery_init(void)
                     // 3-cell, 3S
                     battery_min_voltage = 9000;
                     charger_min_system_voltage = 0x1E00;
-
-                    // this will pull CELL high -> 3S config
-                    gpio_set(&BAT_CELL_SEL, true);
-                    gpio_set(&CHG_CELL_CFG, true);
-                    delay_us(100);
-                    gpio_set(&CHG_CELL_CFG, false);
                 } else {
                     // 4-cell, 2S2P
                     battery_min_voltage = 6000;
                     charger_min_system_voltage = 0x1600;
-
-                    // this will float CELL -> 2S config
-                    gpio_set(&BAT_CELL_SEL, false);
-                    gpio_set(&CHG_CELL_CFG, true);
-                    delay_us(100);
-                    gpio_set(&CHG_CELL_CFG, false);
                 }
                 DEBUG(" min volt: %d mV\n", battery_min_voltage);
 

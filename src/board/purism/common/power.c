@@ -316,16 +316,6 @@ void power_off_s5(void) {
     tPCH14;
 #endif // DEEP_SX
 
-#if 0
-    // if charger is not plugged in then off means off,
-    // else keep EC powered for eventual battery charge
-    // ToDo XXX - this needs to go somewhere else
-    if (gpio_get(&ACIN_N)) {
-        GPIO_SET_DEBUG(SMC_SHUTDOWN_N, false);
-    } else {
-        GPIO_SET_DEBUG(SMC_SHUTDOWN_N, true);
-    }
-#endif
     update_power_state();
 }
 
@@ -680,27 +670,4 @@ void power_event(void) {
         gpio_set(&XLP_OUT, 0);
 #endif // HAVE_XLP_OUT
     }
-
-//TODO: do not require both LEDs
-//#if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
-#if 0
-    if (!(battery_status & BATTERY_INITIALIZED)) {
-        // No battery connected
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, false);
-    } else if (ac_new) {
-        // Discharging (no AC adapter)
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, false);
-    } else if (battery_current == 0) {
-        // Fully charged
-        // TODO: turn off charger
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, true);
-    } else {
-        // Charging
-        gpio_set(&LED_BAT_CHG, true);
-        gpio_set(&LED_BAT_FULL, false);
-    }
-#endif // HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
 }
