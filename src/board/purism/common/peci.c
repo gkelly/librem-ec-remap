@@ -117,6 +117,78 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     }
 }
 
+#define PECI_INDEX_POWER_LIMITS_PL1             0x1A
+#define PECI_PARAMS_POWER_LIMITS_PL1            0x0000
+#define PECI_PL1_CONTROL_TIME_WINDOWS           (0x00DC0000) /* 28 seconds */
+#define PECI_PL1_POWER_LIMIT_ENABLE             (0x01 << 15)
+#define PECI_PL1_POWER_LIMIT(x)                 (x << 3)
+
+#define PECI_INDEX_POWER_LIMITS_PL2             0x1B
+#define PECI_PARAMS_POWER_LIMITS_PL2            0x0000
+#define PECI_PL2_CONTROL_TIME_WINDOWS           (0x00 << 16)
+#define PECI_PL2_POWER_LIMIT_ENABLE             (0x01 << 15)
+#define PECI_PL2_POWER_LIMIT(x)                 (x << 3)
+
+#define PECI_INDEX_POWER_LIMITS_PSYS_PL2        0x3B
+#define PECI_PARAMS_POWER_LIMITS_PSYS_PL2       0x0000
+#define PECI_PSYS_PL2_CONTROL_TIME_WINDOWS      (0xDC << 16) /* 28 seconds */
+#define PECI_PSYS_PL2_POWER_LIMIT_ENABLE        (0x01 << 15)
+#define PECI_PSYS_PL2_POWER_LIMIT(x)            (x << 3)
+
+#define PECI_INDEX_POWER_LIMITS_PL4             0x3C
+#define PECI_PARAMS_POWER_LIMITS_PL4            0x0000
+#define PECI_PL4_POWER_LIMIT(x)                 (x << 3)
+
+int peci_update_PL1(int watt)
+{
+        int rv;
+        uint32_t data;
+
+        if (power_state != POWER_STATE_S0)
+                return -1;
+
+        data = PECI_PL1_CONTROL_TIME_WINDOWS | PECI_PL1_POWER_LIMIT_ENABLE |
+                PECI_PL1_POWER_LIMIT(watt);
+
+        rv = peci_wr_pkg_config(PECI_INDEX_POWER_LIMITS_PL1, PECI_PARAMS_POWER_LIMITS_PL1,
+                data);
+
+        return rv;
+}
+
+int peci_update_PL2(int watt)
+{
+        int rv;
+        uint32_t data;
+
+        if (power_state != POWER_STATE_S0)
+                return -1;
+
+        data = PECI_PL2_CONTROL_TIME_WINDOWS | PECI_PL2_POWER_LIMIT_ENABLE |
+                PECI_PL2_POWER_LIMIT(watt);
+
+        rv = peci_wr_pkg_config(PECI_INDEX_POWER_LIMITS_PL2, PECI_PARAMS_POWER_LIMITS_PL2,
+                data);
+
+        return rv;
+}
+
+int peci_update_PL4(int watt)
+{
+        int rv;
+        uint32_t data;
+
+        if (power_state != POWER_STATE_S0)
+                return -1;
+
+        data = PECI_PL4_POWER_LIMIT(watt);
+
+        rv = peci_wr_pkg_config(PECI_INDEX_POWER_LIMITS_PL4, PECI_PARAMS_POWER_LIMITS_PL4,
+                data);
+
+        return rv;
+}
+
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 void peci_event(void) {
     uint8_t duty;

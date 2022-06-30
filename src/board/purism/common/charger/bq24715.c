@@ -15,8 +15,9 @@ static bool charger_enabled = true; // charger is enable by default at POR
 int battery_charger_disable(void) {
     int res = 0;
 
-    if (!charger_enabled)
+    if (!charger_enabled) {
         return 0;
+    }
 
     DEBUG("CHG disable\n");
 
@@ -41,8 +42,7 @@ int battery_charger_disable(void) {
     res = smbus_write(
         CHARGER_ADDRESS,
         0x12,
-        // SBC_CHARGE_INHIBIT | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_800KHZ | SBC_WDTMR_ADJ_175S
-        SBC_CHARGE_INHIBIT | SBC_IDPM_EN | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_1MHZ | SBC_WDTMR_ADJ_175S | SBC_AUDIO_FREQ_LIM
+        SBC_CHARGE_INHIBIT | SBC_LDO_MODE_EN | SBC_LSFET_OCP_THR | SBC_PWM_FREQ_1MHZ | SBC_WDTMR_ADJ_175S | SBC_IDPM_EN
     );
     DEBUG("CHG disabled\n");
     charger_enabled = false;
@@ -54,8 +54,9 @@ int battery_charger_disable(void) {
 int battery_charger_enable(void) {
     int res = 0;
 
-    if (charger_enabled)
+    if (charger_enabled) {
         return 0;
+    }
 
     DEBUG("CHG enable @ %dmV %dmA\n", battery_charge_voltage, battery_charge_current);
 
